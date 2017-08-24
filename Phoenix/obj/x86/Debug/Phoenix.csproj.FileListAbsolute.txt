@@ -20,3 +20,33 @@ c:\users\adarby\documents\visual studio 2015\Projects\Phoenix\Phoenix\bin\Window
 c:\users\adarby\documents\visual studio 2015\Projects\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.Direct3D9.xml
 c:\users\adarby\documents\visual studio 2015\Projects\Phoenix\Phoenix\obj\x86\Debug\Phoenix.exe
 c:\users\adarby\documents\visual studio 2015\Projects\Phoenix\Phoenix\obj\x86\Debug\Phoenix.pdb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\obj\x86\Debug\Phoenix.exe
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\obj\x86\Debug\Phoenix.pdb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Phoenix.exe
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Phoenix.pdb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\MonoGame.Framework.dll
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.MediaFoundation.dll
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.dll
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.XAudio2.dll
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.DXGI.dll
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.Direct3D11.dll
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.Direct2D1.dll
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.XInput.dll
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.Direct3D9.dll
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\MonoGame.Framework.xml
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.MediaFoundation.xml
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.xml
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.XAudio2.xml
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.DXGI.xml
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.Direct3D11.xml
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.Direct2D1.xml
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.XInput.xml
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\SharpDX.Direct3D9.xml
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\obj\x86\Debug\Phoenix.csprojResolveAssemblyReference.cache
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\male\walking_down.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\male\walking_left.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\male\walking_right.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\male\walking_tiles.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\male\walking_up.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\maps\WorldMap.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\maps\WorldMapData.xml
