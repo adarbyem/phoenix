@@ -48,7 +48,6 @@ C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprit
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\male\walking_right.xnb
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\male\walking_tiles.xnb
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\male\walking_up.xnb
-C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\maps\WorldMap.xnb
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\maps\WorldMapData.xml
 C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\maps\WorldMapData.xml
 C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\male\walking_down.xnb
@@ -82,3 +81,10 @@ C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\obj\x86\Debug\Phoenix.pdb
 C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\maps\WorldMap_Layer0.xnb
 C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\maps\WorldMap_Layer3.xnb
 C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\maps\WorldMap_Layer5.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\maps\WorldMap_Layer0.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\maps\WorldMap_Layer3.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\maps\WorldMap_Layer5.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\female\walking_down.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\female\walking_left.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\female\walking_right.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\female\walking_up.xnb

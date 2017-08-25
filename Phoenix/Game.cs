@@ -23,6 +23,7 @@ namespace Phoenix
         Animation PlayerAnimationLower;
         Animation PlayerAnimationUpper;
         Texture2D PlayerTexture;
+        string playerGender;
 
         //Map
         Texture2D CurrentMapBase;
@@ -39,7 +40,8 @@ namespace Phoenix
         int MapYTiles;
         int currentTileX;
         int currentTileY;
-        int[][] mapData;
+        int[][] collisionMapData;
+        int[][] invisibleCollisionMapData;
 
         //Inputs
         KeyboardState previousKeyboardState;
@@ -49,6 +51,8 @@ namespace Phoenix
         string direction;
         int playerMovementSpeed = 1;
         int PlayerAnimationLowerSpeed = 300;
+        bool isMoving = false;
+        int distanceToTravel = 0;
 
         public Game()
         {
@@ -68,6 +72,7 @@ namespace Phoenix
             playerLower = new Player();
             playerUpper = new Player();
             direction = "down";
+            playerGender = "female";
             base.Initialize();
         }
 
@@ -84,7 +89,6 @@ namespace Phoenix
             //Load Player Data
             PlayerAnimationLower = new Phoenix.Animation();
             PlayerAnimationUpper = new Phoenix.Animation();
-            UpdatePlayerDirection("down");
             Vector2 PlayerPositionLower = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
             Vector2 PlayerPositionUpper = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2 - 16);
             //Load Map
@@ -95,43 +99,44 @@ namespace Phoenix
             MapHeight = CurrentMapBase.Height;
             MapXTiles = MapWidth / 16;
             MapYTiles = MapHeight / 16;
-            mapX = (-MapWidth / 2 + GraphicsDevice.Viewport.Width / 2);
-            mapY = (-MapHeight / 2 + GraphicsDevice.Viewport.Height / 2);
-            
+            mapX = (-MapWidth / 2 + GraphicsDevice.Viewport.Width / 2) + 8;
+            mapY = (-MapHeight / 2 + GraphicsDevice.Viewport.Height / 2) + 8;
             CurrentMapBaseRect = new Rectangle(mapX, mapY, CurrentMapBase.Width, CurrentMapBase.Height);
             CurrentMapOverRect = CurrentMapBaseRect;
             CurrentMapTopRect = CurrentMapBaseRect;
             LoadMap();
-            playerLower.Initialize(PlayerAnimationLower, PlayerPositionLower);
-            playerUpper.Initialize(PlayerAnimationUpper, PlayerPositionUpper);
+            playerLower.Initialize(PlayerAnimationLower, PlayerPositionLower, playerGender);
+            playerUpper.Initialize(PlayerAnimationUpper, PlayerPositionUpper, playerGender);
+            UpdatePlayerDirection("down");
         }
         
+        //Loads map data for collition objects and terrain object
         public void LoadMap()
         {
-            string collisionData;
+            string invisibleCollisionData;
             XmlDocument map = new XmlDocument();
             map.Load("Content/maps/WorldMapData.xml");
             XmlNodeList nodes = map.DocumentElement.SelectNodes("/map/layer/data");
-            collisionData = nodes[4].InnerXml;
-            collisionData = collisionData.Replace("\r", "");
-            collisionData = collisionData.Replace("\n", "");
-            mapData = new int[MapYTiles][];
+            invisibleCollisionData = nodes[8].InnerXml;
+            invisibleCollisionData = invisibleCollisionData.Replace("\r", "");
+            invisibleCollisionData = invisibleCollisionData.Replace("\n", "");
+            invisibleCollisionMapData = new int[MapYTiles][];
             for(int x = 0; x < MapYTiles; x++)
             {
-                mapData[x] = new int[MapXTiles];
+                invisibleCollisionMapData[x] = new int[MapXTiles];
                 for(int y = 0; y < MapXTiles; y++)
                 {
                     try
                     {
                         //Parse map value with commas
-                        mapData[x][y] = int.Parse(collisionData.Substring(0, collisionData.IndexOf(",")));
-                        collisionData = collisionData.Remove(0, collisionData.IndexOf(','));
-                        collisionData = collisionData.TrimStart(',');
+                        invisibleCollisionMapData[x][y] = int.Parse(invisibleCollisionData.Substring(0, invisibleCollisionData.IndexOf(",")));
+                        invisibleCollisionData = invisibleCollisionData.Remove(0, invisibleCollisionData.IndexOf(','));
+                        invisibleCollisionData = invisibleCollisionData.TrimStart(',');
                     }
                     catch
                     {
                         //Parse last map data value to prevent trying to parse a comma
-                        mapData[x][y] = int.Parse(collisionData.Substring(0));
+                        invisibleCollisionMapData[x][y] = int.Parse(invisibleCollisionData.Substring(0));
                     }
                 }
             }
@@ -164,78 +169,75 @@ namespace Phoenix
         //Function to update the player
         public void UpdatePlayer(GameTime gameTime)
         {
-
+            //Save the keyboard states
             previousKeyboardState = currentKeyboardState;
             currentKeyboardState = Keyboard.GetState();
-
+            //Determine the current tile the player is on
             currentTileX = ((CurrentMapBaseRect.Location.X) - (GraphicsDevice.Viewport.Width / 2));
-            currentTileX = Math.Abs((int)Math.Ceiling((double)currentTileX / 16));
+            currentTileX = Math.Abs(currentTileX / 16);
             currentTileY = ((CurrentMapBaseRect.Location.Y) - (GraphicsDevice.Viewport.Height / 2));
-            currentTileY = Math.Abs((int)Math.Ceiling((double)currentTileY / 16));
+            currentTileY = Math.Abs(currentTileY / 16);
 
+            //Keyboard event handlers
 
-            if (currentKeyboardState.IsKeyDown(Keys.Down))
+            //Set player to moving
+            if (currentKeyboardState.IsKeyDown(Keys.Down) && !isMoving)
             {
-                PlayerAnimationLower.moving = true;
-                PlayerAnimationUpper.moving = true;
                 if (!IsCollidable(currentTileX, currentTileY + 1))
                 {
-                    CurrentMapBaseRect.Y -= playerMovementSpeed;
+                    SetMoving(true);
+                    distanceToTravel = 16;
                 }
                 if(direction != "down")
                 {
                     direction = "down";
                     UpdatePlayerDirection(direction);
                 }
-                Console.WriteLine(currentTileX + " " + currentTileY);
+                Console.WriteLine(currentTileX + " " + currentTileY);//Display current tile position
             }
-            else if (currentKeyboardState.IsKeyDown(Keys.Up))
+            else if (currentKeyboardState.IsKeyDown(Keys.Up) && !isMoving)
             {
-                PlayerAnimationLower.moving = true;
-                PlayerAnimationUpper.moving = true;
                 if (!IsCollidable(currentTileX, currentTileY - 1))
                 {
-                    CurrentMapBaseRect.Y += playerMovementSpeed;
-
+                    SetMoving(true);
+                    distanceToTravel = 16;
                 }
                 if (direction != "up")
                 {
                     direction = "up";
                     UpdatePlayerDirection(direction);
                 }
-                Console.WriteLine(currentTileX + " " + currentTileY);
+                Console.WriteLine(currentTileX + " " + currentTileY);//Display current tile position
             }
-            else if (currentKeyboardState.IsKeyDown(Keys.Left))
+            else if (currentKeyboardState.IsKeyDown(Keys.Left) && !isMoving)
             {
-                PlayerAnimationLower.moving = true;
-                PlayerAnimationUpper.moving = true;
                 if (!IsCollidable(currentTileX- 1, currentTileY))
                 {
-                    CurrentMapBaseRect.X += playerMovementSpeed;
+                    SetMoving(true);
+                    distanceToTravel = 16;
                 }
                 if (direction != "left")
                 {
                     direction = "left";
                     UpdatePlayerDirection(direction);
                 }
-                Console.WriteLine(currentTileX + " " + currentTileY);
+                Console.WriteLine(currentTileX + " " + currentTileY);//Display current tile position
             }
-            else if (currentKeyboardState.IsKeyDown(Keys.Right))
+            else if (currentKeyboardState.IsKeyDown(Keys.Right) && !isMoving)
             {
-                PlayerAnimationLower.moving = true;
-                PlayerAnimationUpper.moving = true;
                 if (!IsCollidable(currentTileX + 1, currentTileY))
                 {
-                    CurrentMapBaseRect.X -= playerMovementSpeed;
+                    SetMoving(true);
+                    distanceToTravel = 16;
                 }
                 if (direction != "right")
                 {
                     direction = "right";
                     UpdatePlayerDirection(direction);
                 }
-                Console.WriteLine(currentTileX + " " + currentTileY);
+                Console.WriteLine(currentTileX + " " + currentTileY);//Display current tile position
             }
-
+            //Sprint
             if (currentKeyboardState.IsKeyDown(Keys.LeftControl))
             {
                 playerMovementSpeed = 2;
@@ -246,18 +248,65 @@ namespace Phoenix
                 playerMovementSpeed = 1;
                 PlayerAnimationLowerSpeed = 300;
             }
+
+            //Process move
+            if (isMoving && distanceToTravel > 0)
+            {
+                switch (direction)
+                {
+                    case "down":
+                        CurrentMapBaseRect.Y -= playerMovementSpeed;
+                        distanceToTravel -= playerMovementSpeed;
+                        break;
+                    case "up":
+                        CurrentMapBaseRect.Y += playerMovementSpeed;
+                        distanceToTravel -= playerMovementSpeed;
+                        break;
+                    case "left":
+                        CurrentMapBaseRect.X += playerMovementSpeed;
+                        distanceToTravel -= playerMovementSpeed;
+                        break;
+                    case "right":
+                        CurrentMapBaseRect.X -= playerMovementSpeed;
+                        distanceToTravel -= playerMovementSpeed;
+                        break;
+                }
+                if(distanceToTravel <= 0)
+                {
+                    isMoving = false;
+                }
+            }
+
+            //Update the lower and upper half of the player
             playerUpper.Update(gameTime);
             playerLower.Update(gameTime);
-            PlayerAnimationLower.moving = false;
-            PlayerAnimationUpper.moving = false;
-            
+            //Turn off the animation and set the player to default standing position
+            if(!isMoving)SetMoving(false);
         }
         //Function to update the direction the player is facing and select the appropriate sprite strip
         public void UpdatePlayerDirection(string direction)
         {
-            PlayerTexture = Content.Load<Texture2D>("sprites/player/male/walking_" + direction);
+            Console.WriteLine(playerUpper.gender);
+            PlayerTexture = Content.Load<Texture2D>("sprites/player/" + playerUpper.gender + "/walking_" + direction);
             PlayerAnimationLower.Initialize(PlayerTexture, new Vector2(0, 16), 32, 16, 16, 2, PlayerAnimationLowerSpeed, Color.White, 1.0f, true, false);
             PlayerAnimationUpper.Initialize(PlayerTexture, Vector2.Zero, 32, 16, 0, 2, PlayerAnimationLowerSpeed, Color.White, 1.0f, true, false);
+        }
+
+        //Function to update player movement
+        public void SetMoving(bool startMoving)
+        {
+            if (startMoving)
+            {
+                PlayerAnimationLower.moving = true;
+                PlayerAnimationUpper.moving = true;
+                isMoving = true;
+            }
+            else
+            {
+                PlayerAnimationLower.moving = false;
+                PlayerAnimationUpper.moving = false;
+            }
+
         }
 
         /// <summary>
@@ -271,11 +320,11 @@ namespace Phoenix
             // TODO: Add your drawing code here
             spriteBatch.Begin();
             //Do Stuff Here
-            spriteBatch.Draw(CurrentMapBase, CurrentMapBaseRect, Color.White);
-            playerLower.Draw(spriteBatch);
-            spriteBatch.Draw(CurrentMapOver, CurrentMapBaseRect, Color.White);
-            playerUpper.Draw(spriteBatch);
-            spriteBatch.Draw(CurrentMapTop, CurrentMapBaseRect, Color.White);
+            spriteBatch.Draw(CurrentMapBase, CurrentMapBaseRect, Color.White);//Layer 0
+            playerLower.Draw(spriteBatch);//Player Lower Half
+            spriteBatch.Draw(CurrentMapOver, CurrentMapBaseRect, Color.White);//Layer 3
+            playerUpper.Draw(spriteBatch);//Player Upper Half
+            spriteBatch.Draw(CurrentMapTop, CurrentMapBaseRect, Color.White);//Layer 5
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -283,7 +332,7 @@ namespace Phoenix
 
         public bool IsCollidable(int x, int y)
         {
-            if (mapData[y][x] != 0) return true;
+            if (invisibleCollisionMapData[y][x] != 0) return true;
             else return false;
         }
     }
