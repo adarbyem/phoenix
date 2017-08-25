@@ -12,6 +12,7 @@ namespace Phoenix
         int frameCount;
         int frameTime;
         int currentFrame;
+        int frameYOffset;
         float scale;
         Color color;
         Rectangle sourceRect = new Rectangle();
@@ -25,7 +26,7 @@ namespace Phoenix
         public Vector2 position;
 
         //Initilaize the Animation
-        public void Initialize(Texture2D texture, Vector2 _position, int frameWidth, int frameHeight, int frameCount, int frametime, Color color, float scale, bool _looping, bool _moving)
+        public void Initialize(Texture2D texture, Vector2 _position, int frameWidth, int frameHeight, int _frameYOffset, int frameCount, int frametime, Color color, float scale, bool _looping, bool _moving)
         {
             //Store arguments into local variables
             this.color = color;
@@ -38,6 +39,7 @@ namespace Phoenix
             position = _position;
             moving = _moving;
             spriteStrip = texture;
+            frameYOffset = _frameYOffset;
 
             //Set times to zero
             elapsedTime = 0;
@@ -72,7 +74,7 @@ namespace Phoenix
             }
 
             //Grab the frame
-            sourceRect = new Rectangle(currentFrame * frameWidth, 0, frameWidth, frameHeight);
+            sourceRect = new Rectangle(currentFrame * frameWidth, frameYOffset, frameWidth, frameHeight);
             destinationRect = new Rectangle((int)position.X - (int)(frameWidth * scale) / 2, (int)position.Y - (int)(frameHeight * scale) / 2, (int)(frameWidth * scale), (int)(frameHeight * scale));
         }
 

@@ -73,7 +73,7 @@
 /processorParam:TextureFormat=Color
 /build:sprites/player/male/walking_up.png
 
-#begin maps/WorldMap.png
+#begin maps/WorldMap_Layer0.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -83,8 +83,32 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:maps/WorldMap.png
+/build:maps/WorldMap_Layer0.png
+
+#begin maps/WorldMap_Layer3.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:maps/WorldMap_Layer3.png
 
 #begin maps/WorldMapData.xml
 /copy:maps/WorldMapData.xml
+
+#begin maps/WorldMap_Layer5.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:maps/WorldMap_Layer5.png
 

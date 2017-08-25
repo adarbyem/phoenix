@@ -4,11 +4,13 @@
   <Platform>Windows</Platform>
   <Config />
   <SourceFiles>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_down.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_left.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_right.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_tiles.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_up.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/maps/WorldMap.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_down.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_left.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_right.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_tiles.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_up.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/maps/WorldMap_Layer0.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/maps/WorldMap_Layer3.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/maps/WorldMap_Layer5.png</File>
   </SourceFiles>
 </SourceFileCollection>
