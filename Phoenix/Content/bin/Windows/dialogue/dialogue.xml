@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Dialogue Naming
+XXYYAAA:
+XXYY = Dialogue Tile Location Number (static)
+AAA = Map Number
+NNNNNAAA:
+NNNNN = NPC ID Number
+AAA = Map Number
+-->
+<dialogues>
+<dialogue id="7170001" disc="Professor Oak Sign">
+	<line>Professor Oak's Laboratory</line>
+</dialogue>
+<dialogue id="6767001" disc="Professor Oak Mailbox">
+	<line>This is Professor Oak's mailbox.</line>
+</dialogue>
+<dialogue id="5369001" disc="Pallet Garden">
+	<line>Enjoy the beautiful flowers of Pallet Town's lovely</line>
+	<line>little garden.</line>
+</dialogue>
+<dialogue id="6758001" disc="Red House Mailbox">
+	<line>This is Red's mailbox.</line>
+</dialogue>
+<dialogue id="5458001" dis="Blue House">
+	<line>This is Blue's mailbox.</line>
+</dialogue>
+<dialogue id="6150001" dis="Route 1 Sign">
+	<line>Route 1: To Viridian City</line>
+</dialogue>
+<dialogue id="6174001" dis="Route 21 Sign">
+	<line>Route 21: To Cinnabar Island</line>
+</dialogue>
+<dialogue id="01001001" dis="Lab Tech NPC Pallet">
+	<line>Lab Tech: Hello there! You should visit Professor</line>
+	<line>Oak before you leave town. I hear he was looking for</line>
+	<line>you.</line>
+</dialogue>
+</dialogues>

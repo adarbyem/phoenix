@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.0.2" orientation="orthogonal" renderorder="left-down" width="3" height="1" tilewidth="32" tileheight="32" nextobjectid="1">
+ <tileset firstgid="1" source="npc/lab_tech_01.tsx"/>
+ <layer name="Tile Layer 1" width="3" height="1">
+  <data encoding="csv">
+6,9,12
+</data>
+ </layer>
+</map>

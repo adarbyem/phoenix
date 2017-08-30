@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+NPC Naming
+XXAAA:
+XX = NPC Number
+AAA = Map Number
+-->
+<npcs>
+	<npc id="01001" sprite="lab_tech_01" map="001" x="55" y="73" dialogue="01001001" speed="300"/>
+</npcs>
