@@ -10,6 +10,7 @@ AAA = Map Number
 "N" = NPC Dialogue
 -->
 <dialogues>
+<!-- PALLET TOWN -->
 <dialogue id="7170001" disc="Professor Oak Sign">
 	<line>Professor Oak's Laboratory</line>
 </dialogue>
@@ -41,5 +42,16 @@ AAA = Map Number
 	<line>Lab Tech: Hello there! You should visit Professor</line>
 	<line>Oak before you leave town. I hear he was looking for</line>
 	<line>you.</line>
+</dialogue>
+<!--ROUTE 1-->
+<dialogue id="6145001" disc="Sign to Pallet Town">
+	<line>To Pallet Town</line>
+</dialogue>
+<dialogue id="611001" disc="Sign to Viridian City">
+	<line>To Viridian City (Closed)</line>
+</dialogue>
+<dialogue id="7643001N" disc="Girl route 1">
+	<line>Girl: Watch out for those ledges, if you get too</line>
+	<line>close you will fall off! Ouch!</line>
 </dialogue>
 </dialogues>

@@ -23,20 +23,27 @@ namespace Phoenix
         public Texture2D texture;
         public Animation upper;
         public Animation lower;
-        public bool isMoving;
-        public int[] defaultLocation;
+        public bool moving;
+        public decimal[] defaultLocation;
         public string dialogueID;
-        int map;
         public int speed;
+        int map;
+        public int mfreq;
+        public int[] changeFromDefaultLocation;
+        public long lastMoveTime;
+        public decimal distanceToTravel;
         
         public void Initialize(string id)
         {
-            defaultLocation = new int[2];
+            lastMoveTime = DateTime.Now.Ticks;
+            defaultLocation = new decimal[2];
+            changeFromDefaultLocation = new int[2];
             direction = "down";
             spriteData = new XmlDocument();
             spriteData.Load("Content/sprites/npc/npc.xml");
             spriteList = spriteData.DocumentElement.SelectNodes("/npcs/npc");
-            isMoving = false;
+            moving = false;
+            distanceToTravel = 0;
             upper = new Phoenix.Animation();
             lower = new Phoenix.Animation();
             for (int x = 0; x < spriteList.Count; x++)
@@ -50,14 +57,15 @@ namespace Phoenix
                     defaultLocation[0] = int.Parse(spriteList[x].Attributes["x"].Value);
                     defaultLocation[1] = int.Parse(spriteList[x].Attributes["y"].Value) - 1;
                     dialogueID = spriteList[x].Attributes["dialogue"].Value;
+                    mfreq = int.Parse(spriteList[x].Attributes["mfreq"].Value);
                     speed = int.Parse(spriteList[x].Attributes["speed"].Value);
                 }
             }
         }
         public void Update(GameTime gameTime, int mapX, int mapY)
         {
-            upper.position = new Vector2(mapX + (defaultLocation[0] * 16) + 8, mapY + defaultLocation[1] * 16 + 24);
-            lower.position = new Vector2(mapX + (defaultLocation[0] * 16) + 8, mapY + defaultLocation[1] * 16 + 8);
+            upper.position = new Vector2(mapX + (float)(defaultLocation[0] * 16) + 8, mapY + (float)defaultLocation[1] * 16 + 24);
+            lower.position = new Vector2(mapX + (float)(defaultLocation[0] * 16) + 8, mapY + (float)defaultLocation[1] * 16 + 8);
             upper.Update(gameTime);
             lower.Update(gameTime);
         }

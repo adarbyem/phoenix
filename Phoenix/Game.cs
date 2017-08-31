@@ -16,8 +16,14 @@ namespace Phoenix
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        //Constants
+        const int BATTLECHANCE = 12;
+        const int BATTLEMODIFIER = 2;
 
-        //Global Variables
+        //RNG
+        Random rng;
+
+        //Player Globals
         Player playerLower;
         Player playerUpper;
         Animation PlayerAnimationLower;
@@ -27,14 +33,12 @@ namespace Phoenix
         List<string> dialogueContent;
         string playerGender;
 
-        //NPC content
+        //NPC Globals
         List<npc> npcs;
         List<string> npcID;
-        List<Animation> npcUpper;
-        List<Animation> npcLower;
-        List<Texture2D> npcTexture;
+        int[] npcOffset;
 
-        //Dialogue Content
+        //Dialogue Globals
         Texture2D DialogueTexture;
         Rectangle DialogueRectangle;
         SpriteFont font;
@@ -45,7 +49,11 @@ namespace Phoenix
         int dialoguePage;
         int currentPage;
 
-        //Map
+        //Splash Screen Globals
+        Texture2D SplashScreen;
+        Rectangle SplashRect;
+
+        //Map Globals
         Texture2D CurrentMapBase;
         Rectangle CurrentMapBaseRect;
         Texture2D CurrentMapOver;
@@ -60,8 +68,9 @@ namespace Phoenix
         int MapYTiles;
         int currentTileX;
         int currentTileY;
-        int[][] invisibleCollisionMapData;
+        double[][] invisibleCollisionMapData;
         int[][] interactableMapData;
+        int[][] tallGrassMapData;
         string mapID = "001";
 
         //Inputs
@@ -76,8 +85,11 @@ namespace Phoenix
         int PlayerAnimationLowerSpeed = 300;
         bool isMoving = false;
         int distanceToTravel = 0;
+        bool isInTallGrass = false;
+        bool playerIsFalling = false;
+        bool playerIsRunning = false;
 
-        //Game state enumerable and reference
+        //Game state and player environment enumerables and reference
         enum GameState
         {
             splash,
@@ -86,6 +98,15 @@ namespace Phoenix
             dialogue
         }
         GameState gameState;
+        enum PlayerEnvironment
+        {
+            outside,
+            swimming,
+            indoors,
+            cave,
+            repel
+        }
+        PlayerEnvironment playerEnvironment;
 
         public Game()
         {
@@ -106,7 +127,9 @@ namespace Phoenix
             playerUpper = new Player();
             direction = "down";
             playerGender = "male";
-            gameState = GameState.ready;
+            gameState = GameState.splash;
+            playerEnvironment = PlayerEnvironment.outside;
+            rng = new Random();
             base.Initialize();
         }
 
@@ -134,6 +157,9 @@ namespace Phoenix
             dialogueX = 100;//100
             dialogueY = 375;//500
             DialogueRectangle = new Rectangle(dialogueX, dialogueY, dialogueWidth, dialogueHeight);
+            //Load Splash
+            SplashScreen = Content.Load<Texture2D>("splash/splash");
+            SplashRect = new Rectangle(0, 0, 800, 600);
             //Load Map
             CurrentMapBase = Content.Load<Texture2D>("maps/WorldMap_Layer0");
             CurrentMapOver = Content.Load<Texture2D>("maps/WorldMap_Layer3");
@@ -163,38 +189,48 @@ namespace Phoenix
         {
             string invisibleCollisionData;
             string interactableData;
+            string tallGrassData;
             XmlDocument map = new XmlDocument();
             map.Load("Content/maps/WorldMapData.xml");
             XmlNodeList nodes = map.DocumentElement.SelectNodes("/map/layer/data");
             invisibleCollisionData = nodes[8].InnerXml;
             interactableData = nodes[9].InnerXml;
+            tallGrassData = nodes[11].InnerXml;
             invisibleCollisionData = invisibleCollisionData.Replace("\r", "");
             invisibleCollisionData = invisibleCollisionData.Replace("\n", "");
+            tallGrassData = tallGrassData.Replace("\r", "");
+            tallGrassData = tallGrassData.Replace("\n", "");
             interactableData = interactableData.Replace("\r", "");
             interactableData = interactableData.Replace("\n", "");
-            invisibleCollisionMapData = new int[MapYTiles][];
+            invisibleCollisionMapData = new double[MapYTiles][];
             interactableMapData = new int[MapYTiles][];
+            tallGrassMapData = new int[MapYTiles][];
             for (int x = 0; x < MapYTiles; x++)
             {
-                invisibleCollisionMapData[x] = new int[MapXTiles];
+                invisibleCollisionMapData[x] = new double[MapXTiles];
                 interactableMapData[x] = new int[MapXTiles];
+                tallGrassMapData[x] = new int[MapXTiles];
                 for(int y = 0; y < MapXTiles; y++)
                 {
                     try
                     {
                         //Parse map value with commas
-                        invisibleCollisionMapData[x][y] = int.Parse(invisibleCollisionData.Substring(0, invisibleCollisionData.IndexOf(",")));
+                        invisibleCollisionMapData[x][y] = double.Parse(invisibleCollisionData.Substring(0, invisibleCollisionData.IndexOf(",")));
                         invisibleCollisionData = invisibleCollisionData.Remove(0, invisibleCollisionData.IndexOf(','));
                         invisibleCollisionData = invisibleCollisionData.TrimStart(',');
                         interactableMapData[x][y] = int.Parse(interactableData.Substring(0, interactableData.IndexOf(",")));
                         interactableData = interactableData.Remove(0, interactableData.IndexOf(','));
                         interactableData = interactableData.TrimStart(',');
+                        tallGrassMapData[x][y] = int.Parse(tallGrassData.Substring(0, tallGrassData.IndexOf(",")));
+                        tallGrassData = tallGrassData.Remove(0, tallGrassData.IndexOf(','));
+                        tallGrassData = tallGrassData.TrimStart(',');
                     }
                     catch
                     {
                         //Parse last map data value to prevent trying to parse a comma
-                        invisibleCollisionMapData[x][y] = int.Parse(invisibleCollisionData.Substring(0));
+                        invisibleCollisionMapData[x][y] = double.Parse(invisibleCollisionData.Substring(0));
                         interactableMapData[x][y] = int.Parse(interactableData.Substring(0));
+                        tallGrassMapData[x][y] = int.Parse(tallGrassData.Substring(0));
                     }
                 }
             }
@@ -221,19 +257,37 @@ namespace Phoenix
                 Exit();
 
             // TODO: Add your update logic here
-            if(gameState == GameState.ready)UpdatePlayer(gameTime);
-            if (gameState == GameState.dialogue) PlayDialogue();
-            for(int x = 0; x < npcs.Count; x++)
+            if (gameState == GameState.ready)
             {
-                npcs.ElementAt(x).Update(gameTime, CurrentMapBaseRect.X, CurrentMapBaseRect.Y);
+                UpdatePlayer(gameTime);
+                MoveNPC();
+                for (int x = 0; x < npcs.Count; x++)
+                {
+                    npcs.ElementAt(x).Update(gameTime, CurrentMapBaseRect.X, CurrentMapBaseRect.Y);
+                }
             }
+            if (gameState == GameState.dialogue) PlayDialogue();
+            if (gameState == GameState.splash) UpdateSplash(gameTime);
             base.Update(gameTime);
         }
-        //Function to update the player
+        //Function to update the splash screen
+        public void UpdateSplash(GameTime gameTime)
+        {
+            //Update keyboard
+            UpdateKeyboard();
+            //Button Event Handlers
+            if (currentKeyboardState.IsKeyDown(Keys.E))
+            {
+                gameState = GameState.ready;
+            }
+        }
+
+        //Function to update the player during ready game state
         public void UpdatePlayer(GameTime gameTime)
         {
             //Save the keyboard states
             UpdateKeyboard();
+
             //Determine the current tile the player is on
             currentTileX = ((CurrentMapBaseRect.Location.X) - (GraphicsDevice.Viewport.Width / 2));
             currentTileX = Math.Abs(currentTileX / 16);
@@ -242,64 +296,73 @@ namespace Phoenix
 
             //Keyboard event handlers
 
+
             //Set player to moving
-            if ((currentKeyboardState.IsKeyDown(Keys.Down) || currentKeyboardState.IsKeyDown(Keys.S)) && !isMoving)
+            if (((currentKeyboardState.IsKeyDown(Keys.Down) || currentKeyboardState.IsKeyDown(Keys.S)) && !isMoving) || (playerIsFalling && !isMoving))
             {
-                if (!IsCollidable(currentTileX, currentTileY + 1) && !IsNPCCollide(currentTileX, currentTileY))
-                {
-                    SetMoving(true);
-                    distanceToTravel = 16;
-                }
-                if(direction != "down")
+
+                if (direction != "down")
                 {
                     direction = "down";
                     UpdatePlayerDirection(direction);
                 }
-                Console.WriteLine(currentTileX + " " + currentTileY);//Display current tile position
-            }
-            else if ((currentKeyboardState.IsKeyDown(Keys.Up) || currentKeyboardState.IsKeyDown(Keys.W)) && !isMoving)
-            {
-                if (!IsCollidable(currentTileX, currentTileY - 1) && !IsNPCCollide(currentTileX, currentTileY - 2))
+                if ((!IsCollidable(currentTileX, currentTileY + 1, false) && IsNPCCollide(currentTileX, currentTileY)[0] == -99999))
                 {
                     SetMoving(true);
                     distanceToTravel = 16;
+                    if (playerIsFalling) distanceToTravel += 16;
                 }
+                
+                
+                Console.WriteLine(currentTileX + " " + currentTileY);//Display current tile position DEBUG CODE
+            }
+            else if ((currentKeyboardState.IsKeyDown(Keys.Up) || currentKeyboardState.IsKeyDown(Keys.W)) && !isMoving)
+            {
                 if (direction != "up")
                 {
                     direction = "up";
                     UpdatePlayerDirection(direction);
                 }
-                Console.WriteLine(currentTileX + " " + currentTileY);//Display current tile position
-            }
-            else if ((currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A)) && !isMoving)
-            {
-                if (!IsCollidable(currentTileX - 1, currentTileY) && !IsNPCCollide(currentTileX - 1, currentTileY - 1))
+                if (!IsCollidable(currentTileX, currentTileY - 1, false) && IsNPCCollide(currentTileX, currentTileY - 2)[0] == -99999)
                 {
                     SetMoving(true);
                     distanceToTravel = 16;
                 }
+                
+                Console.WriteLine(currentTileX + " " + currentTileY);//Display current tile position DEBUG CODE
+            }
+            else if ((currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A)) && !isMoving)
+            {
                 if (direction != "left")
                 {
                     direction = "left";
                     UpdatePlayerDirection(direction);
                 }
-                Console.WriteLine(currentTileX + " " + currentTileY);//Display current tile position
-            }
-            else if ((currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D)) && !isMoving)
-            {
-                if (!IsCollidable(currentTileX + 1, currentTileY) && !IsNPCCollide(currentTileX + 1, currentTileY - 1))
+                if (!IsCollidable(currentTileX - 1, currentTileY, false) && IsNPCCollide(currentTileX - 1, currentTileY - 1)[0] == -99999)
                 {
                     SetMoving(true);
                     distanceToTravel = 16;
                 }
+                
+                Console.WriteLine(currentTileX + " " + currentTileY);//Display current tile position DEBUG CODE
+            }
+            else if ((currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D)) && !isMoving)
+            {
                 if (direction != "right")
                 {
                     direction = "right";
                     UpdatePlayerDirection(direction);
                 }
-                Console.WriteLine(currentTileX + " " + currentTileY);//Display current tile position
+                if (!IsCollidable(currentTileX + 1, currentTileY, false) && IsNPCCollide(currentTileX + 1, currentTileY - 1)[0] == -99999)
+                {
+                    SetMoving(true);
+                    distanceToTravel = 16;
+                }
+                
+                Console.WriteLine(currentTileX + " " + currentTileY);//Display current tile position DEBUG CODE
             }
-            //Interact Button
+
+            //Interact Button (to interact with objects and NPCs)
             if (currentKeyboardState.IsKeyDown(Keys.E) && gameState != GameState.dialogue && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
             {
                 if (IsInteractable(direction, currentTileX, currentTileY))
@@ -314,36 +377,40 @@ namespace Phoenix
                     switch (direction)
                     {
                         case "left":
-                            if (IsNPCCollide(currentTileX - 1, currentTileY - 1))
+                            npcOffset = IsNPCCollide(currentTileX - 1, currentTileY - 1);
+                            if (npcOffset[0] != -99999)
                             {
-                                GetDialogue(direction, currentTileX, currentTileY, true);
+                                GetDialogue(direction, currentTileX - npcOffset[0], currentTileY - npcOffset[1], true);
                                 previousGameTime = DateTime.Now.Ticks;
                                 gameState = GameState.dialogue;
                                 currentPage = 5;
                             }
                             break;
                         case "right":
-                            if (IsNPCCollide(currentTileX + 1, currentTileY - 1))
+                            npcOffset = IsNPCCollide(currentTileX + 1, currentTileY - 1);
+                            if (npcOffset[0] != -99999)
                             {
-                                GetDialogue(direction, currentTileX, currentTileY, true);
+                                GetDialogue(direction, currentTileX - npcOffset[0], currentTileY - npcOffset[1], true);
                                 previousGameTime = DateTime.Now.Ticks;
                                 gameState = GameState.dialogue;
                                 currentPage = 5;
                             }
                             break;
                         case "down":
-                            if (IsNPCCollide(currentTileX, currentTileY))
+                            npcOffset = IsNPCCollide(currentTileX, currentTileY);
+                            if (npcOffset[0] != -99999)
                             {
-                                GetDialogue(direction, currentTileX, currentTileY, true);
+                                GetDialogue(direction, currentTileX - npcOffset[0], currentTileY - npcOffset[1], true);
                                 previousGameTime = DateTime.Now.Ticks;
                                 gameState = GameState.dialogue;
                                 currentPage = 5;
                             }
                             break;
                         case "up":
-                            if (IsNPCCollide(currentTileX, currentTileY - 2))
+                            npcOffset = IsNPCCollide(currentTileX, currentTileY - 2);
+                            if (npcOffset[0] != -99999)
                             {
-                                GetDialogue(direction, currentTileX, currentTileY, true);
+                                GetDialogue(direction, currentTileX - npcOffset[0], currentTileY - npcOffset[1], true);
                                 previousGameTime = DateTime.Now.Ticks;
                                 gameState = GameState.dialogue;
                                 currentPage = 5;
@@ -359,11 +426,21 @@ namespace Phoenix
             {
                 playerMovementSpeed = 2;
                 PlayerAnimationLowerSpeed = 150;
+                if (!playerIsRunning)
+                {
+                    playerIsRunning = true;
+                    UpdatePlayerDirection(direction);
+                }
             }
             else if(currentKeyboardState.IsKeyUp(Keys.Space))
             {
                 playerMovementSpeed = 1;
                 PlayerAnimationLowerSpeed = 300;
+                if (playerIsRunning)
+                {
+                    playerIsRunning = false;
+                    UpdatePlayerDirection(direction);
+                }
             }
 
             //Process move
@@ -391,7 +468,37 @@ namespace Phoenix
                 
                 if(distanceToTravel <= 0)
                 {
+                    if (playerIsFalling)
+                    {
+                        playerIsFalling = false;
+                        UpdatePlayerDirection(direction);
+                    }
                     isMoving = false;
+                    if(tallGrassMapData[currentTileY][currentTileX] != 0)
+                    {
+                        isInTallGrass = true;
+                    }
+                    else if(tallGrassMapData[currentTileY][currentTileX] == 0 && isInTallGrass)
+                    {
+                        isInTallGrass = false;
+                    }
+                    //Determine if player entered battle
+                    if(playerEnvironment == PlayerEnvironment.outside && isInTallGrass)
+                    {
+                        //Random battle no modifiers
+                        if(rng.Next(0, BATTLECHANCE) == 9)
+                        {
+                            Console.WriteLine("Tall Grass Battle");
+                        }
+                    }
+                    if(playerEnvironment == PlayerEnvironment.swimming || playerEnvironment == PlayerEnvironment.cave)
+                    {
+                        //Random battle cave and swim modifiers
+                        if (rng.Next(BATTLEMODIFIER, BATTLECHANCE) == 10)
+                        {
+                            Console.WriteLine("Cave or Swim Battle");
+                        }
+                    }
                 }
             }
 
@@ -404,31 +511,99 @@ namespace Phoenix
         //Function to update the direction the player is facing and select the appropriate sprite strip
         public void UpdatePlayerDirection(string direction)
         {
-            PlayerTexture = Content.Load<Texture2D>("sprites/player/" + playerUpper.gender + "/walking_" + direction);
+            if(!playerIsFalling && !playerIsRunning)PlayerTexture = Content.Load<Texture2D>("sprites/player/" + playerUpper.gender + "/walking_" + direction);
+            if(playerIsFalling) PlayerTexture = Content.Load<Texture2D>("sprites/player/" + playerUpper.gender + "/falling_" + direction);
+            if (playerIsRunning && !playerIsFalling) PlayerTexture = Content.Load<Texture2D>("sprites/player/" + playerUpper.gender + "/running_" + direction);
             PlayerAnimationLower.Initialize(PlayerTexture, new Vector2(0, 16), 32, 16, 16, 2, PlayerAnimationLowerSpeed, Color.White, 1.0f, true, false);
             PlayerAnimationUpper.Initialize(PlayerTexture, Vector2.Zero, 32, 16, 0, 2, PlayerAnimationLowerSpeed, Color.White, 1.0f, true, false);
         }
-        public void UpdateNPCDirection(string direction, int index)
+
+        public void MoveNPC()
         {
+            Random rng = new Random();
+            long timestamp = DateTime.Now.Ticks;
+            int direction;
+
             for(int x = 0; x < npcs.Count; x++)
             {
-                switch (direction)
+                if(timestamp > npcs.ElementAt(x).lastMoveTime + npcs.ElementAt(x).mfreq * 100000 && npcs.ElementAt(x).moving == false && npcs.ElementAt(x).mfreq != -1)
                 {
-                    case "down":
-                        if(x == index)npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathDown);
-                        break;
-                    case "up":
-                        if (x == index) npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathUp);
-                        break;
-                    case "left":
-                        if (x == index) npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathLeft);
-                        break;
-                    case "right":
-                        if (x == index) npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathRight);
-                        break;
-                }
-                
+                    direction = rng.Next(1, 16);//Default 1, 16
+                    
+                    switch (direction)
+                    {
 
+                        case 1://Up
+                            if (!IsCollidable((int)npcs.ElementAt(x).defaultLocation[0], (int)npcs.ElementAt(x).defaultLocation[1], true))
+                            {
+                                npcs.ElementAt(x).moving = true;
+                                npcs.ElementAt(x).distanceToTravel = 1;
+                                npcs.ElementAt(x).changeFromDefaultLocation[1]--;
+                                npcs.ElementAt(x).direction = "up";
+                                npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathUp);
+                            }
+                            break;
+                        case 2://Down
+                            if (!IsCollidable((int)npcs.ElementAt(x).defaultLocation[0], (int)npcs.ElementAt(x).defaultLocation[1] + 2, true))
+                            {
+                                npcs.ElementAt(x).moving = true;
+                                npcs.ElementAt(x).distanceToTravel = 1;
+                                npcs.ElementAt(x).changeFromDefaultLocation[1]++;
+                                npcs.ElementAt(x).direction = "down";
+                                npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathDown);
+                            }
+                            break;
+                        case 3://Left
+                            if (!IsCollidable((int)npcs.ElementAt(x).defaultLocation[0] - 1, (int)npcs.ElementAt(x).defaultLocation[1] + 1, true))
+                            {
+                                npcs.ElementAt(x).moving = true;
+                                npcs.ElementAt(x).distanceToTravel = 1;
+                                npcs.ElementAt(x).changeFromDefaultLocation[0]--;
+                                npcs.ElementAt(x).direction = "left";
+                                npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathLeft);
+                            }
+                            break;
+                        case 4://Right
+                            if (!IsCollidable((int)npcs.ElementAt(x).defaultLocation[0] + 1, (int)npcs.ElementAt(x).defaultLocation[1] + 1, true))
+                            {
+                                npcs.ElementAt(x).moving = true;
+                                npcs.ElementAt(x).distanceToTravel = 1;
+                                npcs.ElementAt(x).changeFromDefaultLocation[0]++;
+                                npcs.ElementAt(x).direction = "right";
+                                npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathRight);
+                            }
+                            break;
+                        default:
+                            //No move at all 33% chance
+                            break;
+                    }
+                    npcs.ElementAt(x).upper.Initialize(npcs.ElementAt(x).texture, Vector2.Zero, 32, 16, 16, 2, npcs.ElementAt(x).speed, Color.White, 1.0f, true, npcs.ElementAt(x).moving);
+                    npcs.ElementAt(x).lower.Initialize(npcs.ElementAt(x).texture, new Vector2(100, 116), 32, 16, 0, 2, npcs.ElementAt(x).speed, Color.White, 1.0f, true, npcs.ElementAt(x).moving);
+                    npcs.ElementAt(x).lastMoveTime = DateTime.Now.Ticks;
+                }
+                else if (npcs.ElementAt(x).moving)
+                {
+                    switch (npcs.ElementAt(x).direction)
+                    {
+                        case "up":
+                            npcs.ElementAt(x).defaultLocation[1] -= 0.02m;
+                            npcs.ElementAt(x).distanceToTravel -= 0.02m;
+                            break;
+                        case "down":
+                            npcs.ElementAt(x).defaultLocation[1] += 0.02m;
+                            npcs.ElementAt(x).distanceToTravel -= 0.02m;
+                            break;
+                        case "left":
+                            npcs.ElementAt(x).defaultLocation[0] -= 0.02m;
+                            npcs.ElementAt(x).distanceToTravel -= 0.02m;
+                            break;
+                        case "right":
+                            npcs.ElementAt(x).defaultLocation[0] += 0.02m;
+                            npcs.ElementAt(x).distanceToTravel -= 0.02m;
+                            break;
+                    }
+                    if (npcs.ElementAt(x).distanceToTravel <= 0) npcs.ElementAt(x).moving = false;
+                }
             }
         }
 
@@ -459,58 +634,71 @@ namespace Phoenix
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            //Do Stuff Here
-            //Draw Base Map
-            spriteBatch.Draw(CurrentMapBase, CurrentMapBaseRect, Color.White);//Layer 0
-            //Draw player lower half
-            playerLower.Draw(spriteBatch);//Player Lower Half
-            //Draw NPC lower half
-            for(int x = 0; x < npcs.Count; x++)
+            if(gameState == GameState.splash)
             {
-                npcs.ElementAt(x).lower.Draw(spriteBatch);
+                spriteBatch.Draw(SplashScreen, SplashRect, Color.White);
             }
-            //Draw map layer 3
-            spriteBatch.Draw(CurrentMapOver, CurrentMapBaseRect, Color.White);//Layer 3
-            
-            //Draw npc upper
-            for (int x = 0; x < npcs.Count; x++)
+            else
             {
-                npcs.ElementAt(x).upper.Draw(spriteBatch);
-                Console.WriteLine(npcs.ElementAt(0).texture);
-            }
-            //Draw player upper
-            playerUpper.Draw(spriteBatch);//Player Upper Half
-            spriteBatch.Draw(CurrentMapTop, CurrentMapBaseRect, Color.White);//Layer 5
-            if (gameState == GameState.dialogue)
-            {
-                spriteBatch.Draw(DialogueTexture, DialogueRectangle, Color.White);//Dialogue
-                if (currentPage - 5 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 5], new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
-                if (currentPage - 4 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 4], new Vector2(dialogueX + 15, dialogueY + 24), Color.Black);
-                if (currentPage - 3 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 3], new Vector2(dialogueX + 15, dialogueY + 39), Color.Black);
-                if (currentPage - 2 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 2], new Vector2(dialogueX + 15, dialogueY + 54), Color.Black);
-                if (currentPage - 1 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 1], new Vector2(dialogueX + 15, dialogueY + 69), Color.Black);
+                spriteBatch.Draw(CurrentMapBase, CurrentMapBaseRect, Color.White);//Layer 0
+                playerLower.Draw(spriteBatch);//Player Lower Half
+
+                for (int x = 0; x < npcs.Count; x++)
+                {
+                    npcs.ElementAt(x).upper.Draw(spriteBatch);
+                }
+
+                spriteBatch.Draw(CurrentMapOver, CurrentMapBaseRect, Color.White);//Layer 3
+
+                for (int x = 0; x < npcs.Count; x++)
+                {
+                    npcs.ElementAt(x).lower.Draw(spriteBatch);
+                }
+
+                playerUpper.Draw(spriteBatch);//Player Upper Half
+                spriteBatch.Draw(CurrentMapTop, CurrentMapBaseRect, Color.White);//Layer 5
+
+                if (gameState == GameState.dialogue)//Draw dialogue string if the game state is in dialogue mode
+                {
+                    spriteBatch.Draw(DialogueTexture, DialogueRectangle, Color.White);//Dialogue
+                    if (currentPage - 5 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 5], new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
+                    if (currentPage - 4 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 4], new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
+                    if (currentPage - 3 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 3], new Vector2(dialogueX + 15, dialogueY + 41), Color.Black);
+                    if (currentPage - 2 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 2], new Vector2(dialogueX + 15, dialogueY + 57), Color.Black);
+                    if (currentPage - 1 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 1], new Vector2(dialogueX + 15, dialogueY + 73), Color.Black);
+                }
             }
             spriteBatch.End();
 
             base.Draw(gameTime);
-            Console.WriteLine("Done Drawing");
         }
-        //Check if the block the player is facing is collidable
-        public bool IsCollidable(int x, int y)
+
+        //Check if the tile the player is facing is a collidable object
+
+        public bool IsCollidable(int x, int y, bool isNPC)
         {
-            if (invisibleCollisionMapData[y][x] != 0) return true;
+            if(direction == "down" && invisibleCollisionMapData[y][x] == 23843 && !isNPC)
+            {
+                playerIsFalling = true;
+                Console.WriteLine("Falling Player");
+                UpdatePlayerDirection(direction);
+                return false;
+            }
+            else if (invisibleCollisionMapData[y][x] != 0) return true;
             else return false;
         }
-        public bool IsNPCCollide(int x, int y)
+
+        //Check if the tile the player is facing is a collidable NPC
+        public int[] IsNPCCollide(int x, int y)
         {
             for(int z = 0; z < npcs.Count; z++)
             {
                 if (x == npcs.ElementAt(z).defaultLocation[0] && y == npcs.ElementAt(z).defaultLocation[1])
                 {
-                    return true;
+                    return npcs.ElementAt(z).changeFromDefaultLocation;
                 }
             }
-            return false;
+            return new int[2] { -99999, -99999 };
         }
 
         //Check if the block the player is facing is interactable
@@ -530,12 +718,11 @@ namespace Phoenix
                     return false;
             }
         }
-        //Gets the event ID for the interaction
+
+        //Gets the event ID for the interaction and changes the npc's direction to face the player and initialized the dialogue
         public void GetDialogue(string direction, int x, int y, bool isNPC)
         {
             int[] tile = new int[2];
-            string newDirection;
-            string tileID;
             switch (direction)
             {
                 case "up":
@@ -596,6 +783,7 @@ namespace Phoenix
             dialogueContent = dialogue.content;
             dialoguePage = dialogueContent.Count;
         }
+
         //Function to play the dialogue
         public void PlayDialogue()
         {
@@ -608,6 +796,7 @@ namespace Phoenix
                 
             }
         }
+
         //Function to update keyboard states
         public void UpdateKeyboard()
         {
@@ -615,6 +804,7 @@ namespace Phoenix
             previousKeyboardState = currentKeyboardState;
             currentKeyboardState = Keyboard.GetState();
         }
+
         //Function to get list of NPC ids;
         public void GetNPCList()
         {
@@ -630,7 +820,6 @@ namespace Phoenix
         //Function to initialize npcs
         public void InitializeNPC()
         {
-            Console.WriteLine("Initialize");
             for(int x = 0; x < npcID.Count; x++)
             {
                 npcs.Add(new npc());
