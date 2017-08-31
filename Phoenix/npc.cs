@@ -24,7 +24,7 @@ namespace Phoenix
         public Animation upper;
         public Animation lower;
         public bool isMoving;
-        int[] defaultLocation;
+        public int[] defaultLocation;
         int map;
         public int speed;
         
@@ -47,15 +47,16 @@ namespace Phoenix
                     spritePathLeft = "sprites/npc/" + spriteList[x].Attributes["sprite"].Value + "_left";
                     spritePathRight = "sprites/npc/" + spriteList[x].Attributes["sprite"].Value + "_right";
                     defaultLocation[0] = int.Parse(spriteList[x].Attributes["x"].Value);
-                    defaultLocation[1] = int.Parse(spriteList[x].Attributes["y"].Value);
+                    defaultLocation[1] = int.Parse(spriteList[x].Attributes["y"].Value) - 1;
                     speed = int.Parse(spriteList[x].Attributes["speed"].Value);
                 }
             }
         }
-        public void Update(GameTime gameTime)
+        public void Update(GameTime gameTime, int mapX, int mapY)
         {
-            upper.position = new Vector2(defaultLocation[0] * 16, defaultLocation[1] * 16);
-            lower.position = new Vector2(defaultLocation[0] * 16, defaultLocation[1] * 16 + 16);
+            upper.position = new Vector2(mapX + (defaultLocation[0] * 16) + 8, mapY + defaultLocation[1] * 16 + 24);
+            lower.position = new Vector2(mapX + (defaultLocation[0] * 16) + 8, mapY + defaultLocation[1] * 16 + 8);
+            //Console.WriteLine(mapx);
             upper.Update(gameTime);
             lower.Update(gameTime);
         }

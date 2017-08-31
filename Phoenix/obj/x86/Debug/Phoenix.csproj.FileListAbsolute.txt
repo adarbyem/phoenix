@@ -97,3 +97,16 @@ C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprit
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\npc\lab_tech_01_right.xnb
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\npc\lab_tech_01_up.xnb
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\npc\npc.xml
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\dialogue\dialogue.xml
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\dialogue\font.ttf
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\npc\npc.xml
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\dialogue\Font.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\dialogue\window.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\npc\lab_tech_01_down.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\npc\lab_tech_01_left.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\npc\lab_tech_01_right.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\npc\lab_tech_01_up.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\female\walking_down.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\female\walking_left.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\female\walking_right.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\player\female\walking_up.xnb

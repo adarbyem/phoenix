@@ -34,6 +34,7 @@ namespace Phoenix
                     break;
                 }
             }
+            
             dialogueLines = contentNode.SelectNodes("line");
             for (int x = 0; x < dialogueLines.Count; x++)
             {

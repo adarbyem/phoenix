@@ -7,6 +7,7 @@ AAA = Map Number
 NNNNNAAA:
 NNNNN = NPC ID Number
 AAA = Map Number
+"N" = NPC Dialogue
 -->
 <dialogues>
 <dialogue id="7170001" disc="Professor Oak Sign">
@@ -31,7 +32,12 @@ AAA = Map Number
 <dialogue id="6174001" dis="Route 21 Sign">
 	<line>Route 21: To Cinnabar Island</line>
 </dialogue>
-<dialogue id="01001001" dis="Lab Tech NPC Pallet">
+<dialogue id="6651001N" dis="Lab Tech NPC Pallet 1">
+	<line>Lab Tech: You should not leave town until you have</line>
+	<line>spoken with Professor Oak. He is waiting for you in</line>
+	<line>his laboratory on the south east side of town.</line>
+</dialogue>
+<dialogue id="5573001N" dis="Lab Tech NPC Pallet 2">
 	<line>Lab Tech: Hello there! You should visit Professor</line>
 	<line>Oak before you leave town. I hear he was looking for</line>
 	<line>you.</line>

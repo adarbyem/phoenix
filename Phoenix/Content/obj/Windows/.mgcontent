@@ -4,23 +4,23 @@
   <Platform>Windows</Platform>
   <Config />
   <SourceFiles>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_down.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_left.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_right.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_tiles.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_up.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/maps/WorldMap_Layer0.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/maps/WorldMap_Layer3.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/maps/WorldMap_Layer5.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/female/walking_down.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/female/walking_left.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/female/walking_right.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/player/female/walking_up.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/dialogue/window.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/dialogue/font.spritefont</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/npc/lab_tech_01_down.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/npc/lab_tech_01_left.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/npc/lab_tech_01_right.png</File>
-    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/npc/lab_tech_01_up.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_down.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_left.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_right.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_tiles.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/male/walking_up.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/maps/WorldMap_Layer0.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/maps/WorldMap_Layer3.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/maps/WorldMap_Layer5.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/female/walking_down.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/female/walking_left.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/female/walking_right.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/player/female/walking_up.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/dialogue/window.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/dialogue/font.spritefont</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/npc/lab_tech_01_down.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/npc/lab_tech_01_left.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/npc/lab_tech_01_right.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/npc/lab_tech_01_up.png</File>
   </SourceFiles>
 </SourceFileCollection>

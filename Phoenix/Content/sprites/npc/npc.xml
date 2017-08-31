@@ -6,5 +6,6 @@ XX = NPC Number
 AAA = Map Number
 -->
 <npcs>
-	<npc id="01001" sprite="lab_tech_01" map="001" x="55" y="73" dialogue="01001001" speed="300"/>
+	<npc id="01001" sprite="lab_tech_01" map="001" x="55" y="73" speed="300"/>
+	<npc id="02001" sprite="lab_tech_01" map="001" x="66" y="51" speed="300"/>
 </npcs>
