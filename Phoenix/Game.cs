@@ -227,7 +227,6 @@ namespace Phoenix
             {
                 npcs.ElementAt(x).Update(gameTime, CurrentMapBaseRect.X, CurrentMapBaseRect.Y);
             }
-            
             base.Update(gameTime);
         }
         //Function to update the player
@@ -305,7 +304,6 @@ namespace Phoenix
             {
                 if (IsInteractable(direction, currentTileX, currentTileY))
                 {
-                    Console.WriteLine("Interact");
                     GetDialogue(direction, currentTileX, currentTileY, false);
                     previousGameTime = DateTime.Now.Ticks;
                     gameState = GameState.dialogue;
@@ -318,7 +316,6 @@ namespace Phoenix
                         case "left":
                             if (IsNPCCollide(currentTileX - 1, currentTileY - 1))
                             {
-                                Console.WriteLine("NPC Collide");
                                 GetDialogue(direction, currentTileX, currentTileY, true);
                                 previousGameTime = DateTime.Now.Ticks;
                                 gameState = GameState.dialogue;
@@ -328,7 +325,6 @@ namespace Phoenix
                         case "right":
                             if (IsNPCCollide(currentTileX + 1, currentTileY - 1))
                             {
-                                Console.WriteLine("NPC Collide");
                                 GetDialogue(direction, currentTileX, currentTileY, true);
                                 previousGameTime = DateTime.Now.Ticks;
                                 gameState = GameState.dialogue;
@@ -338,7 +334,6 @@ namespace Phoenix
                         case "down":
                             if (IsNPCCollide(currentTileX, currentTileY))
                             {
-                                Console.WriteLine("NPC Collide");
                                 GetDialogue(direction, currentTileX, currentTileY, true);
                                 previousGameTime = DateTime.Now.Ticks;
                                 gameState = GameState.dialogue;
@@ -348,7 +343,6 @@ namespace Phoenix
                         case "up":
                             if (IsNPCCollide(currentTileX, currentTileY - 2))
                             {
-                                Console.WriteLine("NPC Collide");
                                 GetDialogue(direction, currentTileX, currentTileY, true);
                                 previousGameTime = DateTime.Now.Ticks;
                                 gameState = GameState.dialogue;
@@ -357,16 +351,6 @@ namespace Phoenix
                             break;
 
                     }
-                    /*(
-                    if (IsNPCCollide(currentTileX - 1, currentTileY - 1))
-                            {
-                                Console.WriteLine("NPC Collide");
-                                GetDialogue(direction, currentTileX, currentTileY, true);
-                                previousGameTime = DateTime.Now.Ticks;
-                                gameState = GameState.dialogue;
-                                currentPage = 5;
-                            }
-                            */
                 } 
                 
             }
@@ -424,25 +408,26 @@ namespace Phoenix
             PlayerAnimationLower.Initialize(PlayerTexture, new Vector2(0, 16), 32, 16, 16, 2, PlayerAnimationLowerSpeed, Color.White, 1.0f, true, false);
             PlayerAnimationUpper.Initialize(PlayerTexture, Vector2.Zero, 32, 16, 0, 2, PlayerAnimationLowerSpeed, Color.White, 1.0f, true, false);
         }
-        public void UpdateNPCDirection(string direction)
+        public void UpdateNPCDirection(string direction, int index)
         {
             for(int x = 0; x < npcs.Count; x++)
             {
                 switch (direction)
                 {
                     case "down":
-                        npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathDown);
+                        if(x == index)npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathDown);
                         break;
                     case "up":
-                        npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathUp);
+                        if (x == index) npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathUp);
                         break;
                     case "left":
-                        npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathLeft);
+                        if (x == index) npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathLeft);
                         break;
                     case "right":
-                        npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathRight);
+                        if (x == index) npcs.ElementAt(x).texture = Content.Load<Texture2D>(npcs.ElementAt(x).spritePathRight);
                         break;
                 }
+                
 
             }
         }
@@ -491,6 +476,7 @@ namespace Phoenix
             for (int x = 0; x < npcs.Count; x++)
             {
                 npcs.ElementAt(x).upper.Draw(spriteBatch);
+                Console.WriteLine(npcs.ElementAt(0).texture);
             }
             //Draw player upper
             playerUpper.Draw(spriteBatch);//Player Upper Half
@@ -507,6 +493,7 @@ namespace Phoenix
             spriteBatch.End();
 
             base.Draw(gameTime);
+            Console.WriteLine("Done Drawing");
         }
         //Check if the block the player is facing is collidable
         public bool IsCollidable(int x, int y)
@@ -547,36 +534,64 @@ namespace Phoenix
         public void GetDialogue(string direction, int x, int y, bool isNPC)
         {
             int[] tile = new int[2];
+            string newDirection;
             string tileID;
             switch (direction)
             {
                 case "up":
                     tile[0] = x;
                     tile[1] = y - 1;
-                    //if (isNPC) tile[1]--;
                     break;
                 case "down":
                     tile[0] = x;
                     tile[1] = y + 1;
                     break;
-                case "left"://Working
+                case "left":
                     tile[0] = x - 1;
                     tile[1] = y;
                     if (isNPC)tile[0] = x - 1;
                     break;
-                case "right"://Working
+                case "right":
                     tile[0] = x + 1;
                     tile[1] = y;
                     break;
                 default:
                     //Shouldn't happen
-                    tile[0] = -1;
-                    tile[1] = -1;
                     break;
             }
             dialogue = new Dialogue();
             if (!isNPC) dialogue.initialize(tile[0] + "" + tile[1] + "" + mapID);
-            else dialogue.initialize(tile[0] + "" + tile[1] + "" + mapID + "N");
+            else
+            {
+                dialogue.initialize(tile[0] + "" + tile[1] + "" + mapID + "N");
+                for(int z = 0; z < npcs.Count; z++)
+                {
+                    if(tile[0] + "" + tile[1] + "" + mapID + "N" == npcs.ElementAt(z).dialogueID)
+                    {
+                        switch (direction)
+                        {
+                            case "left":
+                                npcs.ElementAt(z).direction = "right";
+                                npcs.ElementAt(z).texture = Content.Load<Texture2D>(npcs.ElementAt(z).spritePathRight);
+                                break;
+                            case "right":
+                                npcs.ElementAt(z).direction = "left";
+                                npcs.ElementAt(z).texture = Content.Load<Texture2D>(npcs.ElementAt(z).spritePathLeft);
+                                break;
+                            case "up":
+                                npcs.ElementAt(z).direction = "down";
+                                npcs.ElementAt(z).texture = Content.Load<Texture2D>(npcs.ElementAt(z).spritePathDown);
+                                break;
+                            case "down":
+                                npcs.ElementAt(z).direction = "up";
+                                npcs.ElementAt(z).texture = Content.Load<Texture2D>(npcs.ElementAt(z).spritePathUp);
+                                break;
+                        }
+                        npcs.ElementAt(z).upper.Initialize(npcs.ElementAt(z).texture, Vector2.Zero, 32, 16, 16, 2, npcs.ElementAt(z).speed, Color.White, 1.0f, true, false);
+                        npcs.ElementAt(z).lower.Initialize(npcs.ElementAt(z).texture, new Vector2(100, 116), 32, 16, 0, 2, npcs.ElementAt(z).speed, Color.White, 1.0f, true, false);
+                    }
+                }
+            }
             dialogueContent = new List<string>();
             dialogueContent = dialogue.content;
             dialoguePage = dialogueContent.Count;
