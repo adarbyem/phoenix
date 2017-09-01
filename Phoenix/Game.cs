@@ -20,6 +20,9 @@ namespace Phoenix
         const int BATTLECHANCE = 12;
         const int BATTLEMODIFIER = 2;
 
+        //Pokemon Globals
+        Pokemon pokemon;
+
         //RNG
         Random rng;
 
@@ -108,6 +111,16 @@ namespace Phoenix
         }
         PlayerEnvironment playerEnvironment;
 
+        enum MapEnvironment
+        {
+            grass,
+            forest,
+            cave,
+            beach,
+            surf,
+            desert
+        }
+
         public Game()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -143,6 +156,9 @@ namespace Phoenix
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+
+            //Load Pokemon
+            
             
             //Load Player Data
             PlayerAnimationLower = new Phoenix.Animation();
