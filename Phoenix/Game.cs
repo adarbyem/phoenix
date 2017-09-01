@@ -20,8 +20,19 @@ namespace Phoenix
         const int BATTLECHANCE = 12;
         const int BATTLEMODIFIER = 2;
 
+        //Battle Globals
+        string[] mapPaths;
+        Texture2D battleBG;
+        Rectangle battleBGRect;
+        Texture2D battlePlace;
+        Rectangle battlePlaceRect;
+
         //Pokemon Globals
         Pokemon pokemon;
+
+        //Player Pokemon
+        List<Pokemon.pokemon> playerBox;
+        List<Pokemon.pokemon> pcBox0;
 
         //RNG
         Random rng;
@@ -57,6 +68,7 @@ namespace Phoenix
         Rectangle SplashRect;
 
         //Map Globals
+        Maps maps;
         Texture2D CurrentMapBase;
         Rectangle CurrentMapBaseRect;
         Texture2D CurrentMapOver;
@@ -75,6 +87,7 @@ namespace Phoenix
         int[][] interactableMapData;
         int[][] tallGrassMapData;
         string mapID = "001";
+        string mapEnvironmentType;
 
         //Inputs
         KeyboardState previousKeyboardState;
@@ -98,7 +111,8 @@ namespace Phoenix
             splash,
             mainMenu,
             ready,
-            dialogue
+            dialogue,
+            battle
         }
         GameState gameState;
         enum PlayerEnvironment
@@ -120,6 +134,7 @@ namespace Phoenix
             surf,
             desert
         }
+        MapEnvironment mapEnvironment;
 
         public Game()
         {
@@ -142,7 +157,15 @@ namespace Phoenix
             playerGender = "male";
             gameState = GameState.splash;
             playerEnvironment = PlayerEnvironment.outside;
+            mapEnvironment = MapEnvironment.grass;
+            maps = new Maps();
+            mapPaths = new string[2];
             rng = new Random();
+            pokemon = new Pokemon();
+            battleBGRect = new Rectangle(0, 0, 512, 384);
+            battlePlaceRect = new Rectangle(0, 0, 512, 384);
+            playerBox = new List<Pokemon.pokemon>();
+            pcBox0 = new List<Pokemon.pokemon>();
             base.Initialize();
         }
 
@@ -158,7 +181,10 @@ namespace Phoenix
             // TODO: use this.Content to load your game content here
 
             //Load Pokemon
-            
+            pokemon.InitializeMoves();
+            pokemon.InitializePokemon();
+
+            playerBox.Add(pokemon.pidgey);
             
             //Load Player Data
             PlayerAnimationLower = new Phoenix.Animation();
@@ -282,9 +308,31 @@ namespace Phoenix
                     npcs.ElementAt(x).Update(gameTime, CurrentMapBaseRect.X, CurrentMapBaseRect.Y);
                 }
             }
+            //Updates the map environment
+            switch (mapEnvironment)
+            {
+                case MapEnvironment.grass:
+                    mapEnvironmentType = "grass";
+                    break;
+                    
+            }
             if (gameState == GameState.dialogue) PlayDialogue();
             if (gameState == GameState.splash) UpdateSplash(gameTime);
+            if (gameState == GameState.battle) UpdateBattle(gameTime);
             base.Update(gameTime);
+        }
+
+        //Function to update the battle feature
+        public void UpdateBattle(GameTime gameTime)
+        {
+            //Update keyboard
+            UpdateKeyboard();
+
+            //Key presses
+            if (currentKeyboardState.IsKeyDown(Keys.R))
+            {
+                gameState = GameState.ready;
+            }
         }
         //Function to update the splash screen
         public void UpdateSplash(GameTime gameTime)
@@ -505,6 +553,12 @@ namespace Phoenix
                         if(rng.Next(0, BATTLECHANCE) == 9)
                         {
                             Console.WriteLine("Tall Grass Battle");
+                            mapPaths = maps.getMap(mapEnvironmentType, false);
+                            battleBG = Content.Load<Texture2D>("battle/backgrounds/" + mapPaths[0]);
+                            battlePlace = Content.Load<Texture2D>("battle/backgrounds/" + mapPaths[1]);
+                            gameState = GameState.battle;
+                            getPlayerPokemon();
+                            getEnemyPokemon();
                         }
                     }
                     if(playerEnvironment == PlayerEnvironment.swimming || playerEnvironment == PlayerEnvironment.cave)
@@ -534,6 +588,19 @@ namespace Phoenix
             PlayerAnimationUpper.Initialize(PlayerTexture, Vector2.Zero, 32, 16, 0, 2, PlayerAnimationLowerSpeed, Color.White, 1.0f, true, false);
         }
 
+        //Function to get enemy pokemon
+        public void getEnemyPokemon()
+        {
+
+        }
+
+        //Function to get player pokemon
+        public void getPlayerPokemon()
+        {
+
+        }
+
+        //Function to randomly move npcs
         public void MoveNPC()
         {
             Random rng = new Random();
@@ -650,11 +717,18 @@ namespace Phoenix
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
+
+            //Gamestate splash
             if(gameState == GameState.splash)
             {
                 spriteBatch.Draw(SplashScreen, SplashRect, Color.White);
             }
-            else
+            else if(gameState == GameState.battle)
+            {
+                spriteBatch.Draw(battleBG, battleBGRect, Color.White);
+                spriteBatch.Draw(battlePlace, battlePlaceRect, Color.White);
+            }
+            else if(gameState == GameState.ready || gameState == GameState.dialogue)
             {
                 spriteBatch.Draw(CurrentMapBase, CurrentMapBaseRect, Color.White);//Layer 0
                 playerLower.Draw(spriteBatch);//Player Lower Half

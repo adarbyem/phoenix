@@ -34,8 +34,6 @@ namespace Phoenix
                 magnitude = _magnitude;
                 effect = _effect;
                 PP = _PP;
-
-
             }
         }
 
@@ -49,17 +47,18 @@ namespace Phoenix
             public int PP_move4;
             public int[] attackAffinity;
             public int[] defenseAffinity;
-            moves move1;
-            moves move2;
-            moves move3;
-            moves move4;
+            public moves move1;
+            public moves move2;
+            public moves move3;
+            public moves move4;
 
-            public void setMoves(moves _move1, moves _move2, moves _move3, moves _move4)
+            public void setStats(string _name, moves _move1, moves _move2, moves _move3, moves _move4)
             {
-                moves move1 = _move1;
-                moves move2 = _move2;
-                moves move3 = _move3;
-                moves move4 = _move4;
+                name = _name;
+                move1 = _move1;
+                move2 = _move2;
+                move3 = _move3;
+                move4 = _move4;
             }
         }
 
@@ -91,8 +90,8 @@ namespace Phoenix
 
         public void InitializePokemon()
         {
-            rattata.setMoves(tackle, tailWhip, NONE, NONE);
-            pidgey.setMoves(gust, NONE, NONE, NONE);
+            rattata.setStats("Rattata", tackle, tailWhip, NONE, NONE);
+            pidgey.setStats("Pidgey", gust, NONE, NONE, NONE);
         }
     }
 }

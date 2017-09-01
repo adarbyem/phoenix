@@ -3423,5 +3423,22 @@
     <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/pokemon/black-white-back.png</File>
     <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/pokemon/black-white-front-shiny.png</File>
     <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/pokemon/black-white-front.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/beach_0.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/cave_0.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/cave_0_place.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/cave_0_place_fishing.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/cave_1.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/cave_1_place.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/cave_1_place_fishing.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/grass_0.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/grass_0_place.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/grass_1.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/rock_0.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/sand_0_place.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/sand_0_place_fishing.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/sand_1_place.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/sand_1_place_fishing.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/water_0.png</File>
+    <File>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/water_0_place.png</File>
   </SourceFiles>
 </SourceFileCollection>
