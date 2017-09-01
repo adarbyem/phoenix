@@ -97,9 +97,6 @@
 /processorParam:TextureFormat=Color
 /build:maps/WorldMap_Layer3.png
 
-#begin maps/WorldMapData.xml
-/copy:maps/WorldMapData.xml
-
 #begin maps/WorldMap_Layer5.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -41251,4 +41248,58 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:battle/backgrounds/water_0_place.png
+
+#begin maps/MapMeta.xml
+/copy:maps/MapMeta.xml
+
+#begin maps/WorldMapData.xml
+/copy:maps/WorldMapData.xml
+
+#begin menu/battle_0.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:menu/battle_0.png
+
+#begin menu/selector.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:menu/selector.png
+
+#begin menu/battle_moves.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:menu/battle_moves.png
+
+#begin menu/moveselector.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:menu/moveselector.png
 

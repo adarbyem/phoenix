@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <SourceFile>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/npc/girl_01_left.png</SourceFile>
-  <SourceTime>2017-08-31T17:21:48.1713166-07:00</SourceTime>
-  <DestFile>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/bin/Windows/sprites/npc/girl_01_left.xnb</DestFile>
-  <DestTime>2017-08-31T17:22:20.3164091-07:00</DestTime>
+  <SourceFile>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/npc/girl_01_left.png</SourceFile>
+  <SourceTime>2017-08-31T13:55:39.5755817-07:00</SourceTime>
+  <DestFile>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/bin/Windows/sprites/npc/girl_01_left.xnb</DestFile>
+  <DestTime>2017-09-01T12:59:07.9418934-07:00</DestTime>
   <Importer>TextureImporter</Importer>
   <ImporterTime>2017-03-01T07:05:36-08:00</ImporterTime>
   <Processor>TextureProcessor</Processor>
