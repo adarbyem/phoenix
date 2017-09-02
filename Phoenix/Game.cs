@@ -17,8 +17,9 @@ namespace Phoenix
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         //Constants
-        const int BATTLECHANCE = 12;//Default 12
-        const int BATTLEMODIFIER = 2;//Default 2
+        const int BATTLECHANCE = 2;//Default 12 Higher = less chance
+        const int BATTLEMODIFIER = 2;//Default 2 Higher = more chance in areas without tall grass
+        const int BATTLESPEED = 10;//Default 10 battle message speed
 
         //Menu Globals
         Texture2D menuSelector;
@@ -48,12 +49,20 @@ namespace Phoenix
         Vector2 move3pos;
         Vector2 move4pos;
         Pokemon.moves moveToUse;
+        Pokemon.moves selectedEnemyMove;
         string selectedMove;
         double netDamage;
-
+        int type;
+        bool didDisplayEffectiveness;
         string encounterText = "";
         bool playerFirst = true;
         string battleMenuSelection;
+        bool playerAnimationComplete;
+        bool enemyAnimationComplete;
+        int animationCycle;
+        bool reverseAnimation;
+        long animationTime;
+        long animationDelay;
 
         //Pokemon Globals
         Pokemon pokemon;
@@ -173,9 +182,13 @@ namespace Phoenix
             enemyTurn,
             runSucceed,
             runFail,
+            displayingResult,
+            animatingPlayer,
+            animatingEnemy,
             end
         }
         BattleState battleState;
+        BattleState previousBattleState;
 
         enum BattleMenuDepth
         {
@@ -184,7 +197,7 @@ namespace Phoenix
             pokemon,
             item,
             run,
-            waiting
+            waiting,
         }
         BattleMenuDepth battleMenuDepth;
 
@@ -231,6 +244,12 @@ namespace Phoenix
             pcBox0 = new List<Pokemon.pokemon>();
             shinyString = "";
             selectedMove = "move1";
+            type = -1;
+            didDisplayEffectiveness = false;
+            playerAnimationComplete = true;
+            enemyAnimationComplete = true;
+            animationDelay = 100000;
+            animationCycle = 0;
             base.Initialize();
         }
 
@@ -388,7 +407,7 @@ namespace Phoenix
             }
             if (gameState == GameState.dialogue) PlayDialogue();
             if (gameState == GameState.splash) UpdateSplash(gameTime);
-            if (gameState == GameState.battle) UpdateBattle(gameTime);
+            if (gameState == GameState.battle && battleState != BattleState.displayingResult) UpdateBattle(gameTime);
             base.Update(gameTime);
         }
 
@@ -399,7 +418,22 @@ namespace Phoenix
             UpdateKeyboard();
 
             //Key presses
-            if (currentKeyboardState.IsKeyDown(Keys.R))
+            if (currentKeyboardState.IsKeyDown(Keys.P) && playerAnimationComplete)
+            {
+                reverseAnimation = false;
+                playerAnimationComplete = false;
+                battleState = BattleState.animatingPlayer;
+                animationTime = DateTime.Now.Ticks;
+            }
+            if(currentKeyboardState.IsKeyDown(Keys.O) && enemyAnimationComplete)
+            {
+                reverseAnimation = false;
+                enemyAnimationComplete = false;
+                battleState = BattleState.animatingEnemy;
+                animationTime = DateTime.Now.Ticks;
+            }
+
+            if (currentKeyboardState.IsKeyDown(Keys.R) && enemyAnimationComplete)
             {
                 gameState = GameState.ready;
                 battleState = BattleState.begin;
@@ -759,7 +793,7 @@ namespace Phoenix
                     if(playerEnvironment == PlayerEnvironment.outside && isInTallGrass)
                     {
                         //Random battle no modifiers
-                        if(rng.Next(9, BATTLECHANCE) + 1 == 10)//Default 1,10
+                        if(rng.Next(1, BATTLECHANCE) + 1 == BATTLECHANCE)//Default 1,10
                         {
                             //local variables
                             string playerShinyString = "";
@@ -811,7 +845,7 @@ namespace Phoenix
                             //Set initial encounter text
                             previousGameTime = DateTime.Now.Ticks;
                             encounterText = "A wild " + enemyPokemonObject.name + " appeared!";
-                            Console.WriteLine(enemyPokemonObject.atk + " " + enemyPokemonObject.satk + " " + enemyPokemonObject.def + " " + enemyPokemonObject.sdef + " " + enemyPokemonObject.evade + " " + enemyPokemonObject.spd);
+                            //Console.WriteLine(enemyPokemonObject.atk + " " + enemyPokemonObject.satk + " " + enemyPokemonObject.def + " " + enemyPokemonObject.sdef + " " + enemyPokemonObject.evade + " " + enemyPokemonObject.spd);
                         }
                     }
                     if(playerEnvironment == PlayerEnvironment.swimming || playerEnvironment == PlayerEnvironment.cave)
@@ -963,85 +997,12 @@ namespace Phoenix
             {
                 spriteBatch.Draw(SplashScreen, SplashRect, Color.White);
             }
-            if(gameState == GameState.battle)
+            if(gameState == GameState.battle)drawBattle();
+            if (gameState == GameState.ready || gameState == GameState.dialogue)
             {
-                spriteBatch.Draw(battleBG, battleBGRect, Color.White);
-                spriteBatch.Draw(battlePlace, battlePlaceRect, Color.White);
-                spriteBatch.Draw(enemyPokemon, enemyPokemonRect, Color.White);
-                spriteBatch.Draw(playerPokemon, playerPokemonRect, Color.White);
-                spriteBatch.Draw(DialogueTexture, DialogueRectangle, Color.White);//Dialogue
-
-                if(battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial)
-                {
-                    spriteBatch.Draw(battleMenu0, battleMenu0Rect, Color.White);
-                    spriteBatch.Draw(menuSelector, menuSelectorRect, Color.White);
-                }
+                drawGame();
             }
-
-            if (battleState == BattleState.begin || battleState == BattleState.runFail || battleState == BattleState.runSucceed) spriteBatch.DrawString(font, encounterText, new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
-
-
-            if (gameState == GameState.battle && battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.fight)
-            {
-                spriteBatch.Draw(battleMenuMoves, battleMenuMovesRect, Color.White);
-                if (playerPokemonObject.move1.name != "NONE")
-                {
-                    spriteBatch.DrawString(font, playerPokemonObject.move1.name, move1pos, Color.Black);
-                    spriteBatch.DrawString(font, "PP: " + playerPokemonObject.PP_move1 + "/" + playerPokemonObject.move1.PP, new Vector2(move1pos.X + 40, move1pos.Y + 15), Color.Black);
-                }
-                if (playerPokemonObject.move2.name != "NONE")
-                {
-                    spriteBatch.DrawString(font, playerPokemonObject.move2.name, move2pos, Color.Black);
-                    spriteBatch.DrawString(font, "PP: " + playerPokemonObject.PP_move2 + "/" + playerPokemonObject.move2.PP, new Vector2(move2pos.X + 40, move2pos.Y + 15), Color.Black);
-                }
-                if (playerPokemonObject.move3.name != "NONE")
-                {
-                    spriteBatch.DrawString(font, playerPokemonObject.move3.name, move3pos, Color.Black);
-                    spriteBatch.DrawString(font, "PP: " + playerPokemonObject.PP_move3 + "/" + playerPokemonObject.move3.PP, new Vector2(move3pos.X + 40, move3pos.Y + 15), Color.Black);
-                }
-                if (playerPokemonObject.move4.name != "NONE")
-                {
-                    spriteBatch.DrawString(font, playerPokemonObject.move4.name, move4pos, Color.Black);
-                    spriteBatch.DrawString(font, "PP: " + playerPokemonObject.PP_move4 + "/" + playerPokemonObject.move4.PP, new Vector2(move4pos.X + 40, move4pos.Y + 15), Color.Black);
-                }
-                spriteBatch.Draw(menuSelectorMoves, menuSelectorMovesRect, Color.White);
-            }
-
-
-            if(gameState == GameState.ready || gameState == GameState.dialogue)
-            {
-                spriteBatch.Draw(CurrentMapBase, CurrentMapBaseRect, Color.White);//Layer 0
-                playerLower.Draw(spriteBatch);//Player Lower Half
-
-                for (int x = 0; x < npcs.Count; x++)
-                {
-                    npcs.ElementAt(x).upper.Draw(spriteBatch);
-                }
-
-                spriteBatch.Draw(CurrentMapOver, CurrentMapBaseRect, Color.White);//Layer 3
-
-                for (int x = 0; x < npcs.Count; x++)
-                {
-                    npcs.ElementAt(x).lower.Draw(spriteBatch);
-                }
-
-                playerUpper.Draw(spriteBatch);//Player Upper Half
-                spriteBatch.Draw(CurrentMapTop, CurrentMapBaseRect, Color.White);//Layer 5
-
-                if (gameState == GameState.dialogue)//Draw dialogue string if the game state is in dialogue mode
-                {
-                    spriteBatch.Draw(DialogueTexture, DialogueRectangle, Color.White);//Dialogue
-                    if (currentPage - 5 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 5], new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
-                    if (currentPage - 4 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 4], new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
-                    if (currentPage - 3 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 3], new Vector2(dialogueX + 15, dialogueY + 41), Color.Black);
-                    if (currentPage - 2 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 2], new Vector2(dialogueX + 15, dialogueY + 57), Color.Black);
-                    if (currentPage - 1 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 1], new Vector2(dialogueX + 15, dialogueY + 73), Color.Black);
-                }
-            }
-
-
             spriteBatch.End();
-
             base.Draw(gameTime);
         }
 
@@ -1258,7 +1219,6 @@ namespace Phoenix
                     Console.WriteLine("You broke something");
                     break;
             }
-
             Console.WriteLine(playerPokemonObject.name + " uses " + moveToUse.name + " on enemy " + enemyPokemonObject.name + "!");
             if (!didHit()) Console.WriteLine("Missed!");
             else
@@ -1268,15 +1228,17 @@ namespace Phoenix
             applyPlayerConditions();
             applyEnemyConditions();
             //PROCESS ADDITIONAL PLAYER COMBAT ACTIONS HERE
-            //SOME SORT OF DELAY SO RESULTS WINDOW DOES NOT DISAPPEAR TOO FAST
-            battleState = BattleState.enemyTurn;
+            previousBattleState = battleState;
+            battleState = BattleState.displayingResult;
+            previousGameTime = DateTime.Now.Ticks;
+            didDisplayEffectiveness = false;
         }
 
         //Process enemy move commands here
         public void processEnemyMoves()
         {
             int numMoves = 4;
-            Pokemon.moves selectedMove = pokemon.NONE;
+            selectedEnemyMove = pokemon.NONE;
             if(enemyPokemonObject.move4.name == "NONE")
             {
                 numMoves = 3;
@@ -1296,31 +1258,30 @@ namespace Phoenix
             switch (rng.Next(0, numMoves) + 1)
             {
                 case 1:
-                    selectedMove = enemyPokemonObject.move1;
+                    selectedEnemyMove = enemyPokemonObject.move1;
                     break;
                 case 2:
-                    selectedMove = enemyPokemonObject.move2;
+                    selectedEnemyMove = enemyPokemonObject.move2;
                     break;
                 case 3:
-                    selectedMove = enemyPokemonObject.move3;
+                    selectedEnemyMove = enemyPokemonObject.move3;
                     break;
                 case 4:
-                    selectedMove = enemyPokemonObject.move4;
+                    selectedEnemyMove = enemyPokemonObject.move4;
                     break;
                 default:
                     //What other move slots are there???
                     break;
             }
-
-            Console.WriteLine("Enemy " + enemyPokemonObject.name + " used " + selectedMove.name + "!");
-
-            battleState = BattleState.playerTurn;
+            Console.WriteLine("Enemy Turn");
+            previousBattleState = battleState;
+            battleState = BattleState.displayingResult;
             battleMenuDepth = BattleMenuDepth.waiting;
-
+            previousGameTime = DateTime.Now.Ticks;
+            didDisplayEffectiveness = false;
             //DO ENEMY COMBAT RESULTS HERE
             //SOME SORT OF DELAY SO RESULTS WINDOW DOES NOT DISAPPEAR TOO FAST
             //Reset battle menu state
-            battleMenuDepth = BattleMenuDepth.initial;
         }
 
         //Determine if the player hit
@@ -1337,7 +1298,7 @@ namespace Phoenix
         //Determine move result to enemy
         public void playerMoveResult()
         {
-            int type = -1;
+            type = -1;
             int atkDefResult = 0;
             double damage = 0;
             switch (moveToUse.type)
@@ -1351,7 +1312,7 @@ namespace Phoenix
                 case 1:
                     atkDefResult = playerPokemonObject.atk - enemyPokemonObject.def;
                     if (atkDefResult <= 1) atkDefResult = 1;
-                    damage = (playerPokemonObject.attackAffinity[0] / enemyPokemonObject.defenseAffinity[0]) * atkDefResult * moveToUse.magnitude;
+                    damage = (playerPokemonObject.attackAffinity[type] / enemyPokemonObject.defenseAffinity[type]) * atkDefResult * moveToUse.magnitude;
                     break;
             }
 
@@ -1384,6 +1345,203 @@ namespace Phoenix
             catch(Exception ex)
             {
                 Console.WriteLine(ex);
+            }
+        }
+
+
+        //Drawing functions below avoid writing new functions not draw or animation related
+        public void drawBattle()
+        {
+            spriteBatch.Draw(battleBG, battleBGRect, Color.White);
+            spriteBatch.Draw(battlePlace, battlePlaceRect, Color.White);
+            spriteBatch.Draw(enemyPokemon, enemyPokemonRect, Color.White);
+            spriteBatch.Draw(playerPokemon, playerPokemonRect, Color.White);
+            spriteBatch.Draw(DialogueTexture, DialogueRectangle, Color.White);//Dialogue
+
+            if (battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial)
+            {
+                spriteBatch.Draw(battleMenu0, battleMenu0Rect, Color.White);
+                spriteBatch.Draw(menuSelector, menuSelectorRect, Color.White);
+            }
+            if (battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.fight)
+            {
+                spriteBatch.Draw(battleMenuMoves, battleMenuMovesRect, Color.White);
+                if (playerPokemonObject.move1.name != "NONE")
+                {
+                    spriteBatch.DrawString(font, playerPokemonObject.move1.name, move1pos, Color.Black);
+                    spriteBatch.DrawString(font, "PP: " + playerPokemonObject.PP_move1 + "/" + playerPokemonObject.move1.PP, new Vector2(move1pos.X + 40, move1pos.Y + 15), Color.Black);
+                }
+                if (playerPokemonObject.move2.name != "NONE")
+                {
+                    spriteBatch.DrawString(font, playerPokemonObject.move2.name, move2pos, Color.Black);
+                    spriteBatch.DrawString(font, "PP: " + playerPokemonObject.PP_move2 + "/" + playerPokemonObject.move2.PP, new Vector2(move2pos.X + 40, move2pos.Y + 15), Color.Black);
+                }
+                if (playerPokemonObject.move3.name != "NONE")
+                {
+                    spriteBatch.DrawString(font, playerPokemonObject.move3.name, move3pos, Color.Black);
+                    spriteBatch.DrawString(font, "PP: " + playerPokemonObject.PP_move3 + "/" + playerPokemonObject.move3.PP, new Vector2(move3pos.X + 40, move3pos.Y + 15), Color.Black);
+                }
+                if (playerPokemonObject.move4.name != "NONE")
+                {
+                    spriteBatch.DrawString(font, playerPokemonObject.move4.name, move4pos, Color.Black);
+                    spriteBatch.DrawString(font, "PP: " + playerPokemonObject.PP_move4 + "/" + playerPokemonObject.move4.PP, new Vector2(move4pos.X + 40, move4pos.Y + 15), Color.Black);
+                }
+                spriteBatch.Draw(menuSelectorMoves, menuSelectorMovesRect, Color.White);
+            }
+            if (battleState == BattleState.begin || battleState == BattleState.runFail || battleState == BattleState.runSucceed) spriteBatch.DrawString(font, encounterText, new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
+            if (battleState == BattleState.displayingResult && previousBattleState == BattleState.playerTurn) drawMoveResult(playerPokemonObject.name + " uses " + moveToUse.name + " on enemy " + enemyPokemonObject.name + "!");
+            if (battleState == BattleState.displayingResult && previousBattleState == BattleState.enemyTurn) drawMoveResult("Enemy " + enemyPokemonObject.name + " used " + selectedEnemyMove.name + " on " + playerPokemonObject.name + "!");
+            if (battleState == BattleState.animatingPlayer) animatePlayer();
+            if (battleState == BattleState.animatingEnemy) animateEnemy();
+        }
+
+        //Draw main game
+        public void drawGame()
+        {
+            spriteBatch.Draw(CurrentMapBase, CurrentMapBaseRect, Color.White);//Layer 0
+            playerLower.Draw(spriteBatch);//Player Lower Half
+
+            for (int x = 0; x < npcs.Count; x++)
+            {
+                npcs.ElementAt(x).upper.Draw(spriteBatch);
+            }
+
+            spriteBatch.Draw(CurrentMapOver, CurrentMapBaseRect, Color.White);//Layer 3
+
+            for (int x = 0; x < npcs.Count; x++)
+            {
+                npcs.ElementAt(x).lower.Draw(spriteBatch);
+            }
+
+            playerUpper.Draw(spriteBatch);//Player Upper Half
+            spriteBatch.Draw(CurrentMapTop, CurrentMapBaseRect, Color.White);//Layer 5
+            if (gameState == GameState.dialogue) drawDialogue();
+        }
+       
+        //Draw dialogue
+        public void drawDialogue()
+        {
+            spriteBatch.Draw(DialogueTexture, DialogueRectangle, Color.White);//Dialogue
+            if (currentPage - 5 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 5], new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
+            if (currentPage - 4 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 4], new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
+            if (currentPage - 3 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 3], new Vector2(dialogueX + 15, dialogueY + 41), Color.Black);
+            if (currentPage - 2 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 2], new Vector2(dialogueX + 15, dialogueY + 57), Color.Black);
+            if (currentPage - 1 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 1], new Vector2(dialogueX + 15, dialogueY + 73), Color.Black);
+        }
+
+        //Draw battle results
+        public void drawMoveResult(string result)
+        {
+            //Console.WriteLine("Drawing Result");
+            spriteBatch.DrawString(font, result, new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
+
+                if(previousBattleState == BattleState.playerTurn)
+                {
+                    if(playerPokemonObject.attackAffinity[type] / enemyPokemonObject.defenseAffinity[type] >= 1.5)
+                    {
+                        spriteBatch.DrawString(font, "It was super effective!", new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
+                        if(!didDisplayEffectiveness)previousGameTime = DateTime.Now.Ticks;
+                    }
+                    else if(playerPokemonObject.attackAffinity[type] / enemyPokemonObject.defenseAffinity[type] <= 0.5)
+                    {
+                        spriteBatch.DrawString(font, "It was not very effective!", new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
+                        if (!didDisplayEffectiveness) previousGameTime = DateTime.Now.Ticks;
+                    }
+                didDisplayEffectiveness = true;
+                }
+                if(previousBattleState == BattleState.enemyTurn)
+                {
+                    if (enemyPokemonObject.attackAffinity[type] / playerPokemonObject.defenseAffinity[type] >= 1.5)
+                    {
+                        spriteBatch.DrawString(font, "It was super effective!", new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
+                        if (!didDisplayEffectiveness) previousGameTime = DateTime.Now.Ticks;
+                    }
+                    else if (enemyPokemonObject.attackAffinity[type] / playerPokemonObject.defenseAffinity[type] <= 0.5)
+                    {
+                        spriteBatch.DrawString(font, "It was not very effective!", new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
+                        if (!didDisplayEffectiveness) previousGameTime = DateTime.Now.Ticks;
+                    }
+                    didDisplayEffectiveness = true;
+                }
+                if(previousBattleState == BattleState.playerTurn && didDisplayEffectiveness && DateTime.Now.Ticks > previousGameTime + KeyboardDelay * BATTLESPEED)
+                {
+                    Console.WriteLine("Switch to Enemy");
+                    battleState = BattleState.enemyTurn;
+                }
+                else if(didDisplayEffectiveness && DateTime.Now.Ticks > previousGameTime + KeyboardDelay * BATTLESPEED)
+                {
+                    Console.WriteLine("Switch to Player");
+                    battleState = BattleState.playerTurn;
+                    battleMenuDepth = BattleMenuDepth.initial;
+                }
+            
+        }
+
+        //Animation functions below avoid writing new functions not draw or animation related
+        //player pokemon animations
+        public void animatePlayer()
+        {
+            string testMove = "Tackle";
+            
+            switch (testMove)
+            {
+                case "Tackle":
+                    if (animationCycle < 10 && DateTime.Now.Ticks > animationTime + animationDelay && !reverseAnimation)
+                    {
+                        playerPokemonRect.X += 2;
+                        playerPokemonRect.Y -= 2;
+                        animationCycle++;
+                        animationTime = DateTime.Now.Ticks;
+                    }
+                    else if (animationCycle > 0 && DateTime.Now.Ticks > animationTime + animationDelay && reverseAnimation)
+                    {
+                        playerPokemonRect.X -= 2;
+                        playerPokemonRect.Y += 2;
+                        animationCycle--;
+                        animationTime = DateTime.Now.Ticks;
+                    }
+                    if (animationCycle == 10 && !reverseAnimation)
+                    {
+                        reverseAnimation = true;
+                    }
+                    else if (animationCycle == 0 && reverseAnimation)
+                    {
+                        playerAnimationComplete = true;
+                    }
+                    break;
+            }
+        }
+        //enemy pokemon animations
+        public void animateEnemy()
+        {
+            string testMove = "Tackle";
+
+            switch (testMove)
+            {
+                case "Tackle":
+                    if (animationCycle < 10 && DateTime.Now.Ticks > animationTime + animationDelay && !reverseAnimation)
+                    {
+                        enemyPokemonRect.X -= 2;
+                        enemyPokemonRect.Y += 2;
+                        animationCycle++;
+                        animationTime = DateTime.Now.Ticks;
+                    }
+                    else if (animationCycle > 0 && DateTime.Now.Ticks > animationTime + animationDelay && reverseAnimation)
+                    {
+                        enemyPokemonRect.X += 2;
+                        enemyPokemonRect.Y -= 2;
+                        animationCycle--;
+                        animationTime = DateTime.Now.Ticks;
+                    }
+                    if (animationCycle == 10 && !reverseAnimation)
+                    {
+                        reverseAnimation = true;
+                    }
+                    else if (animationCycle == 0 && reverseAnimation)
+                    {
+                        enemyAnimationComplete = true;
+                    }
+                    break;
             }
         }
     }
