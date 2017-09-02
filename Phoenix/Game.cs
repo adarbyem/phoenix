@@ -43,6 +43,14 @@ namespace Phoenix
         Rectangle battleMenuMovesRect;
         Pokemon.pokemon enemyPokemonObject;
         Pokemon.pokemon playerPokemonObject;
+        Vector2 move1pos;
+        Vector2 move2pos;
+        Vector2 move3pos;
+        Vector2 move4pos;
+        Pokemon.moves moveToUse;
+        string selectedMove;
+        double netDamage;
+
         string encounterText = "";
         bool playerFirst = true;
         string battleMenuSelection;
@@ -214,9 +222,15 @@ namespace Phoenix
             menuSelectorRect = new Rectangle(110, 274, 102, 31);
             battleMenu0Rect = new Rectangle(100, 255, 233, 117);
             battleMenuMovesRect = new Rectangle(200, 315, 395, 102);
+            menuSelectorMovesRect = new Rectangle(210, 322, 191, 44);
+            move1pos = new Vector2(225, 330);
+            move2pos = new Vector2(415, 330);
+            move3pos = new Vector2(225, 375);
+            move4pos = new Vector2(415, 375);
             playerBox = new List<Pokemon.pokemon>();
             pcBox0 = new List<Pokemon.pokemon>();
             shinyString = "";
+            selectedMove = "move1";
             base.Initialize();
         }
 
@@ -235,7 +249,7 @@ namespace Phoenix
             battleMenu0 = Content.Load<Texture2D>("menu/battle_0");
             menuSelector = Content.Load<Texture2D>("menu/selector");
             battleMenuMoves = Content.Load<Texture2D>("menu/battle_moves");
-
+            menuSelectorMoves = Content.Load<Texture2D>("menu/moveselector");
 
             //Load Pokemon
             pokemon.InitializeMoves();
@@ -353,8 +367,6 @@ namespace Phoenix
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
 
             // TODO: Add your update logic here
             if (gameState == GameState.ready)
@@ -398,7 +410,7 @@ namespace Phoenix
                 else battleState = BattleState.enemyTurn;
                 previousGameTime = DateTime.Now.Ticks;
             }
-            else if (currentKeyboardState.IsKeyDown(Keys.E) && battleState == BattleState.playerTurn && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            else if (currentKeyboardState.IsKeyDown(Keys.E) && battleMenuDepth == BattleMenuDepth.initial && battleState == BattleState.playerTurn && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
             {
                 if(battleMenuDepth == BattleMenuDepth.initial)
                 {
@@ -416,28 +428,96 @@ namespace Phoenix
                 menuSelectorRect.X = 110;
                 menuSelectorRect.Y = 274;
                 Console.WriteLine("Reset Battle Menu");
+                previousGameTime = DateTime.Now.Ticks;
             }
             else if (currentKeyboardState.IsKeyDown(Keys.E) && battleState == BattleState.runFail && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
             {
                 battleMenuDepth = BattleMenuDepth.initial;
-                battleState = BattleState.playerTurn;//SET TO ENEMY TURN
+                battleState = BattleState.enemyTurn;//SET TO ENEMY TURN
                 previousGameTime = DateTime.Now.Ticks;
             }
 
             //Movement keys for battlemenustate of fight
-            if(currentKeyboardState.IsKeyDown(Keys.Down) && battleMenuDepth == BattleMenuDepth.fight)
+            if(currentKeyboardState.IsKeyDown(Keys.Escape) && battleMenuDepth == BattleMenuDepth.fight)
             {
+                battleMenuDepth = BattleMenuDepth.initial;
             }
-            if (currentKeyboardState.IsKeyDown(Keys.Up) && battleMenuDepth == BattleMenuDepth.fight)
+            if(currentKeyboardState.IsKeyDown(Keys.Down) && battleMenuDepth == BattleMenuDepth.fight && selectedMove != "move3" && selectedMove != "move4" && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
             {
+                if (playerPokemonObject.move3.name != "NONE" && selectedMove == "move1")
+                {
+                    menuSelectorMovesRect.X = 210;
+                    menuSelectorMovesRect.Y = 368;
+                    selectedMove = "move3";
+                }
+                if(playerPokemonObject.move4.name != "NONE" && selectedMove == "move2")
+                {
+                    menuSelectorMovesRect.X = 400;
+                    menuSelectorMovesRect.Y = 368;
+                    selectedMove = "move4";
+                }
+                previousGameTime = DateTime.Now.Ticks;
             }
-            if (currentKeyboardState.IsKeyDown(Keys.Left) && battleMenuDepth == BattleMenuDepth.fight)
+            if (currentKeyboardState.IsKeyDown(Keys.Up) && battleMenuDepth == BattleMenuDepth.fight && selectedMove != "move1" && selectedMove != "move2" && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
             {
+                if (playerPokemonObject.move1.name != "NONE" && selectedMove == "move3")
+                {
+                    menuSelectorMovesRect.X = 210;
+                    menuSelectorMovesRect.Y = 322;
+                    selectedMove = "move1";
+                }
+                if (playerPokemonObject.move2.name != "NONE" && selectedMove == "move4")
+                {
+                    menuSelectorMovesRect.X = 400;
+                    menuSelectorMovesRect.Y = 322;
+                    selectedMove = "move2";
+                }
+                previousGameTime = DateTime.Now.Ticks;
             }
-            if (currentKeyboardState.IsKeyDown(Keys.Right) && battleMenuDepth == BattleMenuDepth.fight)
+            if (currentKeyboardState.IsKeyDown(Keys.Left) && battleMenuDepth == BattleMenuDepth.fight && selectedMove != "move1" && selectedMove != "move3" && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
             {
+                if (playerPokemonObject.move1.name != "NONE" && selectedMove == "move2")
+                {
+                    menuSelectorMovesRect.X = 210;
+                    menuSelectorMovesRect.Y = 322;
+                    selectedMove = "move1";
+                }
+                if (playerPokemonObject.move3.name != "NONE" && selectedMove == "move4")
+                {
+                    menuSelectorMovesRect.X = 210;
+                    menuSelectorMovesRect.Y = 368;
+                    selectedMove = "move3";
+                }
+                previousGameTime = DateTime.Now.Ticks;
             }
-
+            if (currentKeyboardState.IsKeyDown(Keys.Right) && battleMenuDepth == BattleMenuDepth.fight && selectedMove != "move2" && selectedMove != "move4" && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            {
+                if (playerPokemonObject.move2.name != "NONE" && selectedMove == "move1")
+                {
+                    menuSelectorMovesRect.X = 400;
+                    menuSelectorMovesRect.Y = 322;
+                    selectedMove = "move2";
+                }
+                if (playerPokemonObject.move4.name != "NONE" && selectedMove == "move3")
+                {
+                    menuSelectorMovesRect.X = 400;
+                    menuSelectorMovesRect.Y = 368;
+                    selectedMove = "move4";
+                }
+                previousGameTime = DateTime.Now.Ticks;
+            }
+            if(currentKeyboardState.IsKeyDown(Keys.E) && battleMenuDepth == BattleMenuDepth.fight && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            {
+                Console.WriteLine(battleMenuDepth);
+                processMoveSelection(selectedMove);
+                previousGameTime = DateTime.Now.Ticks;
+            }
+            if(battleState == BattleState.enemyTurn)
+            {
+                battleMenuDepth = BattleMenuDepth.waiting;
+                processEnemyMoves();
+            }
+            //Movement keys for initial battle menu
             if (currentKeyboardState.IsKeyDown(Keys.Down) && battleMenuSelection != "item" && battleMenuSelection != "run" && battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial)
             {
                 menuSelectorRect.Y += 41;
@@ -718,7 +798,7 @@ namespace Phoenix
                             battlePlace = Content.Load<Texture2D>("battle/backgrounds/" + mapPaths[1]);
                             gameState = GameState.battle;
                             //Determine who goes first
-                            if (playerPokemonObject.SPD >= enemyPokemonObject.SPD || true)//Delete boolean after testing
+                            if (playerPokemonObject.spd >= enemyPokemonObject.spd || true)//Delete boolean after testing
                             {
                                 playerFirst = true;
                                 battleMenuDepth = BattleMenuDepth.initial;
@@ -731,6 +811,7 @@ namespace Phoenix
                             //Set initial encounter text
                             previousGameTime = DateTime.Now.Ticks;
                             encounterText = "A wild " + enemyPokemonObject.name + " appeared!";
+                            Console.WriteLine(enemyPokemonObject.atk + " " + enemyPokemonObject.satk + " " + enemyPokemonObject.def + " " + enemyPokemonObject.sdef + " " + enemyPokemonObject.evade + " " + enemyPokemonObject.spd);
                         }
                     }
                     if(playerEnvironment == PlayerEnvironment.swimming || playerEnvironment == PlayerEnvironment.cave)
@@ -890,19 +971,42 @@ namespace Phoenix
                 spriteBatch.Draw(playerPokemon, playerPokemonRect, Color.White);
                 spriteBatch.Draw(DialogueTexture, DialogueRectangle, Color.White);//Dialogue
 
-                if(battleState == BattleState.playerTurn)
+                if(battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial)
                 {
                     spriteBatch.Draw(battleMenu0, battleMenu0Rect, Color.White);
                     spriteBatch.Draw(menuSelector, menuSelectorRect, Color.White);
                 }
-
-                if(battleState == BattleState.begin || battleState == BattleState.runFail || battleState == BattleState.runSucceed)spriteBatch.DrawString(font, encounterText, new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
             }
 
-            if(gameState == GameState.battle && battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.fight)
+            if (battleState == BattleState.begin || battleState == BattleState.runFail || battleState == BattleState.runSucceed) spriteBatch.DrawString(font, encounterText, new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
+
+
+            if (gameState == GameState.battle && battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.fight)
             {
                 spriteBatch.Draw(battleMenuMoves, battleMenuMovesRect, Color.White);
+                if (playerPokemonObject.move1.name != "NONE")
+                {
+                    spriteBatch.DrawString(font, playerPokemonObject.move1.name, move1pos, Color.Black);
+                    spriteBatch.DrawString(font, "PP: " + playerPokemonObject.PP_move1 + "/" + playerPokemonObject.move1.PP, new Vector2(move1pos.X + 40, move1pos.Y + 15), Color.Black);
+                }
+                if (playerPokemonObject.move2.name != "NONE")
+                {
+                    spriteBatch.DrawString(font, playerPokemonObject.move2.name, move2pos, Color.Black);
+                    spriteBatch.DrawString(font, "PP: " + playerPokemonObject.PP_move2 + "/" + playerPokemonObject.move2.PP, new Vector2(move2pos.X + 40, move2pos.Y + 15), Color.Black);
+                }
+                if (playerPokemonObject.move3.name != "NONE")
+                {
+                    spriteBatch.DrawString(font, playerPokemonObject.move3.name, move3pos, Color.Black);
+                    spriteBatch.DrawString(font, "PP: " + playerPokemonObject.PP_move3 + "/" + playerPokemonObject.move3.PP, new Vector2(move3pos.X + 40, move3pos.Y + 15), Color.Black);
+                }
+                if (playerPokemonObject.move4.name != "NONE")
+                {
+                    spriteBatch.DrawString(font, playerPokemonObject.move4.name, move4pos, Color.Black);
+                    spriteBatch.DrawString(font, "PP: " + playerPokemonObject.PP_move4 + "/" + playerPokemonObject.move4.PP, new Vector2(move4pos.X + 40, move4pos.Y + 15), Color.Black);
+                }
+                spriteBatch.Draw(menuSelectorMoves, menuSelectorMovesRect, Color.White);
             }
+
 
             if(gameState == GameState.ready || gameState == GameState.dialogue)
             {
@@ -1098,9 +1202,10 @@ namespace Phoenix
             }
         }
 
+        //Process the Run Away command
         public void processRun()
         {
-            if (playerPokemonObject.SPD >= enemyPokemonObject.SPD)
+            if (playerPokemonObject.spd >= enemyPokemonObject.spd)
             {
                 int run = rng.Next(1, 100) + 1;
                 if (run > 10)
@@ -1117,7 +1222,7 @@ namespace Phoenix
             else
             {
                 int run = rng.Next(1, 100) + 1;
-                if (run < (100 - (enemyPokemonObject.SPD - playerPokemonObject.SPD - 1) * 10))
+                if (run < (100 - (enemyPokemonObject.spd - playerPokemonObject.spd - 1) * 10))
                 {
                     encounterText = playerPokemonObject.name + " ran away successfully!";
                     battleState = BattleState.runSucceed;
@@ -1127,6 +1232,158 @@ namespace Phoenix
                     encounterText = playerPokemonObject.name + " failed to run away!";
                     battleState = BattleState.runFail;
                 }
+            }
+        }
+
+        //Process move command from battle
+        public void processMoveSelection(string move)
+        {
+            moveToUse = new Pokemon.moves();
+            switch (move)
+            {
+                case "move1":
+                    moveToUse = playerPokemonObject.move1;
+                    break;
+                case "move2":
+                    moveToUse = playerPokemonObject.move2;
+                    break;
+                case "move3":
+                    moveToUse = playerPokemonObject.move3;
+                    break;
+                case "move4":
+                    moveToUse = playerPokemonObject.move4;
+                    break;
+                default:
+                    //Should not happen
+                    Console.WriteLine("You broke something");
+                    break;
+            }
+
+            Console.WriteLine(playerPokemonObject.name + " uses " + moveToUse.name + " on enemy " + enemyPokemonObject.name + "!");
+            if (!didHit()) Console.WriteLine("Missed!");
+            else
+            {
+                playerMoveResult();
+            }
+            applyPlayerConditions();
+            applyEnemyConditions();
+            //PROCESS ADDITIONAL PLAYER COMBAT ACTIONS HERE
+            //SOME SORT OF DELAY SO RESULTS WINDOW DOES NOT DISAPPEAR TOO FAST
+            battleState = BattleState.enemyTurn;
+        }
+
+        //Process enemy move commands here
+        public void processEnemyMoves()
+        {
+            int numMoves = 4;
+            Pokemon.moves selectedMove = pokemon.NONE;
+            if(enemyPokemonObject.move4.name == "NONE")
+            {
+                numMoves = 3;
+                if(enemyPokemonObject.move3.name == "NONE")
+                {
+                    numMoves = 2;
+                    if(enemyPokemonObject.move2.name == "NONE")
+                    {
+                        numMoves = 1;
+                        if(enemyPokemonObject.move1.name == "NONE")
+                        {
+                            Console.WriteLine("What have you done?");
+                        }
+                    }
+                }
+            }
+            switch (rng.Next(0, numMoves) + 1)
+            {
+                case 1:
+                    selectedMove = enemyPokemonObject.move1;
+                    break;
+                case 2:
+                    selectedMove = enemyPokemonObject.move2;
+                    break;
+                case 3:
+                    selectedMove = enemyPokemonObject.move3;
+                    break;
+                case 4:
+                    selectedMove = enemyPokemonObject.move4;
+                    break;
+                default:
+                    //What other move slots are there???
+                    break;
+            }
+
+            Console.WriteLine("Enemy " + enemyPokemonObject.name + " used " + selectedMove.name + "!");
+
+            battleState = BattleState.playerTurn;
+            battleMenuDepth = BattleMenuDepth.waiting;
+
+            //DO ENEMY COMBAT RESULTS HERE
+            //SOME SORT OF DELAY SO RESULTS WINDOW DOES NOT DISAPPEAR TOO FAST
+            //Reset battle menu state
+            battleMenuDepth = BattleMenuDepth.initial;
+        }
+
+        //Determine if the player hit
+        public bool didHit()
+        {
+            switch((rng.Next(0, 100) - enemyPokemonObject.evade + playerPokemonObject.evade) > 5)
+            {
+                case true:
+                    return true;
+            }
+            return false;
+        }
+
+        //Determine move result to enemy
+        public void playerMoveResult()
+        {
+            int type = -1;
+            int atkDefResult = 0;
+            double damage = 0;
+            switch (moveToUse.type)
+            {
+                case "Normal":
+                    type = 0;
+                    break;
+            }
+
+            switch (moveToUse.effect) {
+                case 1:
+                    atkDefResult = playerPokemonObject.atk - enemyPokemonObject.def;
+                    if (atkDefResult <= 1) atkDefResult = 1;
+                    damage = (playerPokemonObject.attackAffinity[0] / enemyPokemonObject.defenseAffinity[0]) * atkDefResult * moveToUse.magnitude;
+                    break;
+            }
+
+            applyAfinity(type, 1);
+            netDamage = damage;
+        }
+
+        //Apply player conditions
+        public void applyPlayerConditions()
+        {
+            //Conditional damages here
+        }
+
+        //Apply enemy conditions
+        public void applyEnemyConditions()
+        {
+            //Conditional damages here
+        }
+
+        //Apply Afinity
+        public void applyAfinity(int type, int afininity)
+        {
+            //1 = attack
+            //2 = defense
+            //3 = trainer
+            try
+            {
+                //Apply afininities
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
             }
         }
     }

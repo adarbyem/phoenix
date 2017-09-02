@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <SourceFile>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/sand_0_place_fishing.png</SourceFile>
-  <SourceTime>2017-09-01T07:57:22.8087339-07:00</SourceTime>
-  <DestFile>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/bin/Windows/battle/backgrounds/sand_0_place_fishing.xnb</DestFile>
-  <DestTime>2017-09-01T12:59:59.2640251-07:00</DestTime>
+  <SourceFile>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/sand_0_place_fishing.png</SourceFile>
+  <SourceTime>2017-08-31T19:24:40.6334674-07:00</SourceTime>
+  <DestFile>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/bin/Windows/battle/backgrounds/sand_0_place_fishing.xnb</DestFile>
+  <DestTime>2017-09-01T18:04:25.6146333-07:00</DestTime>
   <Importer>TextureImporter</Importer>
   <ImporterTime>2017-03-01T07:05:36-08:00</ImporterTime>
   <Processor>TextureProcessor</Processor>

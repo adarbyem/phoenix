@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-<map id="001" encounterID="Route 1" env="grass" penv="outside" path="" difficulty="1">
+<map id="001" encounterID="Route 1" env="grass" penv="outside" path="" difficulty="2">
 <pokemon id="19" weight="50"/>
 <pokemon id="16" weight="50"/>
 </map>

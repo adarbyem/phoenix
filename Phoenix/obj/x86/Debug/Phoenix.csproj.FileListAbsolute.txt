@@ -6951,3 +6951,8 @@ C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\menu\
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\menu\selector.xnb
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\menu\battle_moves.xnb
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\menu\moveselector.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\maps\MapMeta.xml
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\menu\battle_0.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\menu\battle_moves.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\menu\moveselector.xnb
+C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\menu\selector.xnb
