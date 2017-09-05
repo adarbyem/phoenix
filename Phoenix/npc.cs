@@ -27,7 +27,6 @@ namespace Phoenix
         public decimal[] defaultLocation;
         public string dialogueID;
         public int speed;
-        int map;
         public int mfreq;
         public int[] changeFromDefaultLocation;
         public long lastMoveTime;

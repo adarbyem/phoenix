@@ -32,9 +32,11 @@ namespace Phoenix
             public int magnitude;
             public int effect;
             public int PP;
+            public string path;
 
-            public void setMoves(string _name, string _type, int _magnitude, int _effect, int _PP)
+            public void setMoves(string _name, string _path, string _type, int _magnitude, int _effect, int _PP)
             {
+                path = _path;
                 name = _name;
                 type = _type;
                 magnitude = _magnitude;
@@ -48,10 +50,15 @@ namespace Phoenix
 
             public string name;
             public int HP;
+            public int MaxHP;
             public int PP_move1;
             public int PP_move2;
             public int PP_move3;
             public int PP_move4;
+            public int PP_move1_current;
+            public int PP_move2_current;
+            public int PP_move3_current;
+            public int PP_move4_current;
             public int[] attackAffinity;
             public int[] defenseAffinity;
             public moves move1;
@@ -70,10 +77,12 @@ namespace Phoenix
             public string status;
             public int condMaginitude;
 
-            public void setStats(string _name, moves _move1, moves _move2, moves _move3, moves _move4, bool _isShiny, int _dex, string _dexSuffix, int _pp1, int _pp2, int _pp3, int _pp4)
+            public void setStats(string _name, int _MaxHP, moves _move1, moves _move2, moves _move3, moves _move4, bool _isShiny, int _dex, string _dexSuffix, int _pp1, int _pp2, int _pp3, int _pp4)
             {
                 attackAffinity = new int[18];
                 defenseAffinity = new int[18];
+                MaxHP = _MaxHP;
+                HP = MaxHP;
                 name = _name;
                 move1 = _move1;
                 move2 = _move2;
@@ -83,6 +92,10 @@ namespace Phoenix
                 PP_move2 = _pp2;
                 PP_move3 = _pp3;
                 PP_move4 = _pp4;
+                PP_move1_current = PP_move1;
+                PP_move2_current = PP_move2;
+                PP_move3_current = PP_move3;
+                PP_move4_current = PP_move4;
                 isShiny = _isShiny;
                 pokedex = _dex;
                 pokedexSuffix = _dexSuffix;
@@ -98,6 +111,69 @@ namespace Phoenix
                 spd = _spd;
                 status = _status;
                 condMaginitude = _condMagnitude;
+            }
+
+            public void train(string stat)
+            {
+                switch (stat)
+                {
+                    case "atk":
+                        atk++;
+                        break;
+                    case "satk":
+                        satk++;
+                        break;
+                    case "def":
+                        def++;
+                        break;
+                    case "sdef":
+                        sdef++;
+                        break;
+                    case "evade":
+                        evade++;
+                        break;
+                    case "spd":
+                        spd++;
+                        break;
+                    case "HP":
+                        MaxHP++;
+                        HP = MaxHP;
+                        break;
+                    case "move1_pp":
+                        PP_move1++;
+                        PP_move1_current = PP_move1;
+                        break;
+                    case "move2_pp":
+                        PP_move2++;
+                        PP_move2_current = PP_move2;
+                        break;
+                    case "move3_pp":
+                        PP_move3++;
+                        PP_move3_current = PP_move3;
+                        break;
+                    case "move4_pp":
+                        PP_move4++;
+                        PP_move4_current = PP_move4;
+                        break;
+                    case "all":
+                        atk++;
+                        def++;
+                        satk++;
+                        sdef++;
+                        evade++;
+                        spd++;
+                        MaxHP++;
+                        HP = MaxHP;
+                        PP_move1++;
+                        PP_move1_current = PP_move1;
+                        PP_move2++;
+                        PP_move2_current = PP_move2;
+                        PP_move3++;
+                        PP_move3_current = PP_move3;
+                        PP_move4++;
+                        PP_move4_current = PP_move4;
+                        break;
+                }
             }
 
         }
@@ -127,18 +203,20 @@ namespace Phoenix
 
         public void InitializeMoves()
         {
-            NONE.setMoves("NONE", "", 0, 0, 0);
-            tackle.setMoves("Tackle", "Normal", 1, 1, 35);
-            tailWhip.setMoves("Tail Whip", "Normal", 1, 4, 30);
-            gust.setMoves("Gust", "Flying", 1, 2, 30);
-            sandAttack.setMoves("Sand Attack", "Normal", 1, 18, 30);
-            growl.setMoves("Growl", "Normal", 1, 8, 30);
-            scratch.setMoves("Scratch", "Normal", 1, 1, 35);
-            highJumpKick.setMoves("High Jump Kick", "Fighting", 1, 1, 15);
-            leer.setMoves("Leer", "Normal", 1, 3, 30);
+            NONE.setMoves("NONE", "", "", 0, 0, 0);
+            tackle.setMoves("Tackle", "", "Normal", 1, 1, 35);
+            tailWhip.setMoves("Tail Whip","tail_whip", "Normal", 1, 4, 30);
+            gust.setMoves("Gust", "gust", "Flying", 1, 1, 30);
+            sandAttack.setMoves("Sand Attack", "sand_attack", "Normal", 1, 18, 30);
+            growl.setMoves("Growl", "growl", "Normal", 1, 8, 30);
+            scratch.setMoves("Scratch", "scratch", "Normal", 1, 1, 35);
+            highJumpKick.setMoves("High Jump Kick", "high_jump_kick", "Fighting", 1, 1, 15);
+            leer.setMoves("Leer", "leer", "Normal", 1, 3, 30);
         }
         //Affinity
         //0 = Normal
+        //1 = Flying
+        //2 = Fighting
             
 
         //Get pokemon for the current Map
@@ -178,31 +256,31 @@ namespace Phoenix
             switch (id)
             {
                 case "1":
-                    newPokemon.setStats("Bulbasaur", tackle, growl, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, growl.PP, NONE.PP, NONE.PP);
-                    newPokemon.setAttrib(8, 5, 5, 5, 5, 5, "Normal", 1);
+                    newPokemon.setStats("Bulbasaur", 10, tackle, leer, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, growl.PP, NONE.PP, NONE.PP);
+                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
                     break;
                 case "4":
-                    newPokemon.setStats("Charmander", scratch, growl, NONE, NONE, isShiny, int.Parse(id), "", scratch.PP, growl.PP, NONE.PP, NONE.PP);
+                    newPokemon.setStats("Charmander", 10, scratch, growl, NONE, NONE, isShiny, int.Parse(id), "", scratch.PP, growl.PP, NONE.PP, NONE.PP);
                     newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
                     break;
                 case "7":
-                    newPokemon.setStats("Squritle", tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP);
+                    newPokemon.setStats("Squritle", 10, tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP);
                     newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
                     break;
                 case "16":
-                    newPokemon.setStats("Pidgey", gust, sandAttack, NONE, NONE, isShiny, int.Parse(id), "", gust.PP, sandAttack.PP, NONE.PP, NONE.PP);
+                    newPokemon.setStats("Pidgey", 10, gust, sandAttack, NONE, NONE, isShiny, int.Parse(id), "", gust.PP, sandAttack.PP, NONE.PP, NONE.PP);
                     newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
                     break;
                 case "19":
-                    newPokemon.setStats("Rattata", tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP);
+                    newPokemon.setStats("Rattata", 10, tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP);
                     newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
                     break;
                 case "25":
-                    newPokemon.setStats("Pikachu", tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP);
+                    newPokemon.setStats("Pikachu", 10, tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP);
                     newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
                     break;
                 default:
-                    newPokemon.setStats("MissingNo", NONE, NONE, NONE, NONE, false, 0, "", tackle.PP, growl.PP, NONE.PP, NONE.PP);
+                    newPokemon.setStats("MissingNo", 10, NONE, NONE, NONE, NONE, false, 0, "", tackle.PP, growl.PP, NONE.PP, NONE.PP);
                     newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
                     break;
             }
