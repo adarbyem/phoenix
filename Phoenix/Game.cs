@@ -320,7 +320,7 @@ namespace Phoenix
             hpBack = Content.Load<Texture2D>("battle/components/hp_back");
             //Load Pokemon
             pokemon.InitializeMoves();
-            playerBox.Add(pokemon.generatePokemon("1", 1));//INITIAL PLAYER POKEMON
+            playerBox.Add(pokemon.generatePokemon("4", 1));//INITIAL PLAYER POKEMON
             //Load Player Data
             PlayerAnimationLower = new Phoenix.Animation();
             PlayerAnimationUpper = new Phoenix.Animation();
