@@ -24,6 +24,15 @@ namespace Phoenix
         public moves scratch;
         public moves highJumpKick;
         public moves leer;
+        public moves sleepPowder;
+        public moves poisonPowder;
+        public moves stunPowder;
+        public moves poisonDamage;
+        public moves paralyzeDamage;
+        public moves blank;
+        public moves sleepDamage;
+        public moves confusionDamage;
+        public moves frozenDamage;
 
         public struct moves
         {
@@ -194,12 +203,14 @@ namespace Phoenix
         //12 = Paralyse
         //13 = Stun
         //14 = Confuse
-        //15 = Toxic
-        //16 = Charm
-        //17 = +Acc
-        //18 = -Acc
-        //19 = -Evade
-        //20 = +Evade
+        //15 = Poison
+        //16 = Toxic
+        //17 = Charm
+        //18 = +Acc
+        //19 = -Acc
+        //20 = -Evade
+        //21 = +Evade
+
 
         public void InitializeMoves()
         {
@@ -212,11 +223,22 @@ namespace Phoenix
             scratch.setMoves("Scratch", "scratch", "Normal", 1, 1, 35);
             highJumpKick.setMoves("High Jump Kick", "high_jump_kick", "Fighting", 1, 1, 15);
             leer.setMoves("Leer", "leer", "Normal", 1, 3, 30);
+            stunPowder.setMoves("Stun Powder", "stun_powder", "Grass", 1, 13, 20);
+            sleepPowder.setMoves("Sleep Powder", "sleep_powder", "Grass", 1, 11, 20);
+            poisonPowder.setMoves("Poison Powder", "poison_powder", "Poison", 1, 15, 20);
+            poisonDamage.setMoves("poison", "poison", "Poison", 0, 0, 0);
+            paralyzeDamage.setMoves("paralyze", "paralyze", "Normal", 0, 0, 0);
+            blank.setMoves("blank", "blank", "Normal", 0, 0, 0);
+            sleepDamage.setMoves("sleep", "sleep", "Normal", 0, 0, 0);
+            confusionDamage.setMoves("confuse", "confuse", "Normal", 0, 0, 0);
+            frozenDamage.setMoves("frozen", "frozen", "Normal", 0, 0, 0);
         }
         //Affinity
         //0 = Normal
         //1 = Flying
         //2 = Fighting
+        //3 = Grass
+        //4 = Poison
             
 
         //Get pokemon for the current Map
@@ -257,31 +279,35 @@ namespace Phoenix
             {
                 case "1":
                     newPokemon.setStats("Bulbasaur", 10, tackle, leer, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, growl.PP, NONE.PP, NONE.PP);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
+                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal", 1);
                     break;
                 case "4":
                     newPokemon.setStats("Charmander", 10, scratch, growl, NONE, NONE, isShiny, int.Parse(id), "", scratch.PP, growl.PP, NONE.PP, NONE.PP);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
+                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal", 1);
                     break;
                 case "7":
                     newPokemon.setStats("Squritle", 10, tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
+                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal", 1);
                     break;
                 case "16":
                     newPokemon.setStats("Pidgey", 10, gust, sandAttack, NONE, NONE, isShiny, int.Parse(id), "", gust.PP, sandAttack.PP, NONE.PP, NONE.PP);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
+                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal", 1);
                     break;
                 case "19":
                     newPokemon.setStats("Rattata", 10, tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
+                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal", 1);
                     break;
                 case "25":
                     newPokemon.setStats("Pikachu", 10, tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
+                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal", 1);
+                    break;
+                case "69":
+                    newPokemon.setStats("Bellsprout", 10, poisonPowder, stunPowder, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP);
+                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal", 1);
                     break;
                 default:
                     newPokemon.setStats("MissingNo", 10, NONE, NONE, NONE, NONE, false, 0, "", tackle.PP, growl.PP, NONE.PP, NONE.PP);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "Normal", 1);
+                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal", 1);
                     break;
             }
             //Default affinities to 5000

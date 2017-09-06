@@ -3469,5 +3469,25 @@
     <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/components/hp_half.png</File>
     <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/components/hp_back.png</File>
     <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/dialogue/font6.spritefont</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/conditions/burn.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/conditions/faint.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/conditions/frozen.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/conditions/paralyze.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/conditions/poison.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/conditions/pokerus.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/conditions/sleep.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/conditions/normal.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/pokemon/back_inv/69.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/pokemon/front_inv/69.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/poison_powder.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/sleep_powder.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/stun_powder.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/poison.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/paralyze.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/blank.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/sleep.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/conditions/confuse.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/confuse.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/frozen.png</File>
   </SourceFiles>
 </SourceFileCollection>
