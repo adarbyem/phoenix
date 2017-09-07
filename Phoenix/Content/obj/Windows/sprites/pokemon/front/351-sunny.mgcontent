@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <SourceFile>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/pokemon/front/351-sunny.png</SourceFile>
-  <SourceTime>2017-09-01T07:57:42.6567185-07:00</SourceTime>
-  <DestFile>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/bin/Windows/sprites/pokemon/front/351-sunny.xnb</DestFile>
-  <DestTime>2017-09-05T09:10:45.8884541-07:00</DestTime>
+  <SourceFile>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/sprites/pokemon/front/351-sunny.png</SourceFile>
+  <SourceTime>2017-09-06T18:46:55.0161678-07:00</SourceTime>
+  <DestFile>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/bin/Windows/sprites/pokemon/front/351-sunny.xnb</DestFile>
+  <DestTime>2017-09-06T19:30:51.79346-07:00</DestTime>
   <Importer>TextureImporter</Importer>
   <ImporterTime>2017-03-01T07:05:36-08:00</ImporterTime>
   <Processor>TextureProcessor</Processor>

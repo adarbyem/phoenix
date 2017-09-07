@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <SourceFile>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/water_0.png</SourceFile>
-  <SourceTime>2017-09-01T07:57:22.8127343-07:00</SourceTime>
-  <DestFile>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/bin/Windows/battle/backgrounds/water_0.xnb</DestFile>
-  <DestTime>2017-09-05T09:11:17.2947341-07:00</DestTime>
+  <SourceFile>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/battle/backgrounds/water_0.png</SourceFile>
+  <SourceTime>2017-09-06T18:46:03.312756-07:00</SourceTime>
+  <DestFile>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/bin/Windows/battle/backgrounds/water_0.xnb</DestFile>
+  <DestTime>2017-09-06T19:31:29.20402-07:00</DestTime>
   <Importer>TextureImporter</Importer>
   <ImporterTime>2017-03-01T07:05:36-08:00</ImporterTime>
   <Processor>TextureProcessor</Processor>
