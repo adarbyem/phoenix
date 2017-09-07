@@ -5,6 +5,8 @@ using System.Xml;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 using PlayerNS;
 
 namespace Phoenix
@@ -21,6 +23,9 @@ namespace Phoenix
         const int BATTLEMODIFIER = 2;//Default 2 Higher = more chance in areas without tall grass
         const int BATTLESPEED = 5;//Default 10 battle message speed
         const int ANIMATIONFRAMETIME = 10;//Default X animation frame speed
+
+        //Title Globals
+        Song titleBGM;
 
         //Menu Globals
         Texture2D menuSelector;
@@ -100,7 +105,7 @@ namespace Phoenix
         bool appliedConditionThisTurn = false;
         bool paralyzeSkip = false;
         string failedSkill = "";
-        bool cureConfusion = false;
+        bool cureCondition = false;
 
         //Pokemon Globals
         Pokemon pokemon;
@@ -260,7 +265,7 @@ namespace Phoenix
             playerUpper = new Player();
             direction = "down";
             playerGender = "male";
-            gameState = GameState.ready;
+            gameState = GameState.splash;
             playerEnvironment = PlayerEnvironment.outside;
             mapEnvironment = MapEnvironment.grass;
             battleState = BattleState.begin;
@@ -307,6 +312,7 @@ namespace Phoenix
             animationCycle = 0;
             currentPokemon = 0;
             finishFrames = 6;//Must be an even number or the sprite will get stuck on it's inverse texture
+            titleBGM = Content.Load<Song>("audio/bgm/title");
             base.Initialize();
         }
 
@@ -375,7 +381,7 @@ namespace Phoenix
             npcID = new List<string>();
             GetNPCList();
             InitializeNPC();
-
+            MediaPlayer.Play(titleBGM);
 
         }
 
@@ -663,6 +669,7 @@ namespace Phoenix
             if (currentKeyboardState.IsKeyDown(Keys.E))
             {
                 gameState = GameState.ready;
+                MediaPlayer.Stop();
             }
         }
 
@@ -1075,6 +1082,7 @@ namespace Phoenix
             if (gameState == GameState.splash)
             {
                 spriteBatch.Draw(SplashScreen, SplashRect, Color.White);
+                
             }
             if (gameState == GameState.battle) drawBattle(gameTime);
             if (gameState == GameState.ready || gameState == GameState.dialogue)
@@ -1275,6 +1283,7 @@ namespace Phoenix
                 }
             }
         }
+
         //Process to save the current pokemon in the correct "bag" slot
         //Should be used when pokemon faints, is changed out, or the battle ends
         public void savePokemon()
@@ -1397,6 +1406,9 @@ namespace Phoenix
                 case "Poison":
                     type = 4;
                     break;
+                case "Fire":
+                    type = 5;
+                    break;
             }
 
             if (!didHit(false))
@@ -1488,6 +1500,9 @@ namespace Phoenix
                 case "Poison":
                     type = 4;
                     break;
+                case "Fire":
+                    type = 5;
+                    break;
             }
 
             switch (moveToUse.effect) {
@@ -1567,7 +1582,7 @@ namespace Phoenix
                             if (rng.Next(0, 100) >= 50)
                             {
                                 battleConditionEffectString = " has snapped out of it's confusion!";
-                                cureConfusion = true;
+                                cureCondition = true;
                             }
                             paralyzeSkip = false;
                         }
@@ -1575,6 +1590,20 @@ namespace Phoenix
                     case "frozen":
                         battleConditionEffectString = playerPokemonObject.name + " is frozen solid!";
                         paralyzeSkip = true;
+                        break;
+                    case "burn":
+                        if (conditionRNG <= 50)
+                        {
+                            battleConditionEffectString = playerPokemonObject.name + " is no longer on fire.";
+                            cureCondition = true;
+                        }
+                        else
+                        {
+                            damage = (int)((double)playerPokemonObject.MaxHP * 0.1) + 1;
+                            battleConditionEffectString = playerPokemonObject.name + " has suffered burning damage!";
+                            playerPokemonObject.HP -= damage;
+                            type = 5;
+                        }
                         break;
                 }
             }
@@ -1791,42 +1820,53 @@ namespace Phoenix
                 else if (battleState == BattleState.playerConditions)
                 {
                     battleAnimationStarted = false;
-                    if (playerPokemonObject.status == "poison")
+                if (playerPokemonObject.status == "poison")
+                {
+                    selectedEnemyMove = pokemon.poisonDamage;
+                    battleState = BattleState.animatingEnemy;
+                }
+                else if (playerPokemonObject.status == "paralyze")
+                {
+                    if (paralyzeSkip) selectedEnemyMove = pokemon.paralyzeDamage;
+                    else selectedEnemyMove = pokemon.blank;
+                    battleState = BattleState.animatingEnemy;
+                }
+                else if (playerPokemonObject.status == "sleep")
+                {
+                    if (!paralyzeSkip)
                     {
-                        selectedEnemyMove = pokemon.poisonDamage;
-                        battleState = BattleState.animatingEnemy;
+                        playerPokemonObject.status = "normal";
+                        selectedEnemyMove = pokemon.blank;
                     }
-                    else if (playerPokemonObject.status == "paralyze")
+                    else selectedEnemyMove = pokemon.sleepDamage;
+                    battleState = BattleState.animatingEnemy;
+                }
+                else if (playerPokemonObject.status == "confuse")
+                {
+                    if (!paralyzeSkip)
                     {
-                        if (paralyzeSkip) selectedEnemyMove = pokemon.paralyzeDamage;
-                        else selectedEnemyMove = pokemon.blank;
-                        battleState = BattleState.animatingEnemy;
+                        selectedEnemyMove = pokemon.blank;
+                        if (cureCondition) playerPokemonObject.status = "normal";
                     }
-                    else if (playerPokemonObject.status == "sleep")
+                    else selectedEnemyMove = pokemon.confusionDamage;
+                    battleState = BattleState.animatingEnemy;
+                }
+                else if (playerPokemonObject.status == "frozen")
+                {
+                    selectedEnemyMove = pokemon.frozenDamage;
+                    battleState = BattleState.animatingEnemy;
+                }
+                else if (playerPokemonObject.status == "burn")
+                {
+                    selectedEnemyMove = pokemon.burnDamage;
+                    if (cureCondition)
                     {
-                        if (!paralyzeSkip)
-                        {
-                            playerPokemonObject.status = "normal";
-                            selectedEnemyMove = pokemon.blank;
-                        }
-                        else selectedEnemyMove = pokemon.sleepDamage;
-                        battleState = BattleState.animatingEnemy;
+                        playerPokemonObject.status = "normal";
+                        selectedEnemyMove = pokemon.blank;
+                        
                     }
-                    else if (playerPokemonObject.status == "confuse")
-                    {
-                        if (!paralyzeSkip)
-                        {
-                            selectedEnemyMove = pokemon.blank;
-                            if (cureConfusion) playerPokemonObject.status = "normal";
-                        }
-                        else selectedEnemyMove = pokemon.confusionDamage;
-                        battleState = BattleState.animatingEnemy;
-                    }
-                    else if (playerPokemonObject.status == "frozen")
-                    {
-                        selectedEnemyMove = pokemon.frozenDamage;
-                        battleState = BattleState.animatingEnemy;
-                    }
+                    battleState = BattleState.animatingEnemy;
+                }
                     result = "";
                 }
         }

@@ -33,6 +33,7 @@ namespace Phoenix
         public moves sleepDamage;
         public moves confusionDamage;
         public moves frozenDamage;
+        public moves burnDamage;
 
         public struct moves
         {
@@ -232,6 +233,7 @@ namespace Phoenix
             sleepDamage.setMoves("sleep", "sleep", "Normal", 0, 0, 0);
             confusionDamage.setMoves("confuse", "confuse", "Normal", 0, 0, 0);
             frozenDamage.setMoves("frozen", "frozen", "Normal", 0, 0, 0);
+            burnDamage.setMoves("burn", "burn", "Normal", 0, 0, 0);
         }
         //Affinity
         //0 = Normal
@@ -239,6 +241,7 @@ namespace Phoenix
         //2 = Fighting
         //3 = Grass
         //4 = Poison
+        //5 = Fire
             
 
         //Get pokemon for the current Map

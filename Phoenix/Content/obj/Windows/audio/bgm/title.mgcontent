@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SourceFile>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/audio/bgm/title.mp3</SourceFile>
+  <SourceTime>2017-09-06T20:03:35.5778085-07:00</SourceTime>
+  <DestFile>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/bin/Windows/audio/bgm/title.xnb</DestFile>
+  <DestTime>2017-09-06T20:04:31.5119357-07:00</DestTime>
+  <Importer>Mp3Importer</Importer>
+  <ImporterTime>2017-03-01T07:05:36-08:00</ImporterTime>
+  <Processor>SongProcessor</Processor>
+  <ProcessorTime>2017-03-01T07:05:36-08:00</ProcessorTime>
+  <Parameters>
+    <Key>Quality</Key>
+    <Value>Best</Value>
+  </Parameters>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput>
+    <string>C:/Users/Aaron/Source/Repos/Phoenix/Phoenix/Content/bin/Windows/audio/bgm/title.wma</string>
+  </BuildOutput>
+</PipelineBuildEvent>
