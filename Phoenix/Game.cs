@@ -34,6 +34,7 @@ namespace Phoenix
         Rectangle menuSelectorMovesRect;
 
         //Battle Globals
+        LevelUp levelup;
         string[] mapPaths;
         int[][] encounters;
         Texture2D battleBG;
@@ -78,6 +79,10 @@ namespace Phoenix
         Rectangle enemyBattleAnimationRect;
         Rectangle playerBattleAnimationRect;
         Rectangle animationFrameSourceRect;
+        Texture2D enemyPokemonGender;
+        Texture2D playerPokemonGender;
+        Rectangle enemyPokemonGenderRect;
+        Rectangle playerPokemonGenderRect;
         string selectedMove;
         double netDamage;
         int type;
@@ -102,14 +107,18 @@ namespace Phoenix
         int playerHPWidth;
         int enemyHPWidth;
         string battleConditionEffectString;
-        bool appliedConditionThisTurn = false;
         bool paralyzeSkip = false;
         string failedSkill = "";
         bool cureCondition = false;
+        int netAffinityGain = 0;
+        bool didLevelUp = false;
 
         //Pokemon Globals
         Pokemon pokemon;
         string shinyString;
+        string femaleString;
+        string playerShinyString = "";
+        string playerFemaleString = "";
 
         //Player Pokemon
         List<Pokemon.pokemon> playerBox;
@@ -171,6 +180,7 @@ namespace Phoenix
         string mapID;
         string mapEncountersID;
         string mapEnvironmentType;
+        string leveledStat = "";
 
         //Inputs
         KeyboardState previousKeyboardState;
@@ -224,13 +234,15 @@ namespace Phoenix
             begin,
             playerTurn,
             playerConditions,
+            enemyConditions,
             enemyTurn,
             runSucceed,
             runFail,
             displayingResult,
             animatingPlayer,
             animatingEnemy,
-            end
+            enemyFaint,
+            playerFaint
         }
         BattleState battleState;
         BattleState previousBattleState;
@@ -265,7 +277,7 @@ namespace Phoenix
             playerUpper = new Player();
             direction = "down";
             playerGender = "male";
-            gameState = GameState.splash;
+            gameState = GameState.ready;
             playerEnvironment = PlayerEnvironment.outside;
             mapEnvironment = MapEnvironment.grass;
             battleState = BattleState.begin;
@@ -292,6 +304,8 @@ namespace Phoenix
             playerHPBackRect = new Rectangle(476, 256, 142, 16);
             enemyBattleStatusRect = new Rectangle(357, 76, 44, 16);
             playerBattleStatusRect = new Rectangle(610, 232, 44, 16);
+            enemyPokemonGenderRect = new Rectangle(204, 91, 15, 18);
+            playerPokemonGenderRect = new Rectangle(460, 246, 15, 18);
             move1pos = new Vector2(225, 330);
             move2pos = new Vector2(415, 330);
             move3pos = new Vector2(225, 375);
@@ -307,12 +321,12 @@ namespace Phoenix
             didDisplayEffectiveness = false;
             playerAnimationComplete = true;
             enemyAnimationComplete = true;
-            appliedConditionThisTurn = false;
             animationDelay = 100000;
             animationCycle = 0;
             currentPokemon = 0;
             finishFrames = 6;//Must be an even number or the sprite will get stuck on it's inverse texture
             titleBGM = Content.Load<Song>("audio/bgm/title");
+            levelup = new LevelUp();
             base.Initialize();
         }
 
@@ -339,7 +353,7 @@ namespace Phoenix
             hpBack = Content.Load<Texture2D>("battle/components/hp_back");
             //Load Pokemon
             pokemon.InitializeMoves();
-            playerBox.Add(pokemon.generatePokemon("4", 1));//INITIAL PLAYER POKEMON
+            playerBox.Add(pokemon.generatePokemon("25"));//INITIAL PLAYER POKEMON
             //Load Player Data
             PlayerAnimationLower = new Phoenix.Animation();
             PlayerAnimationUpper = new Phoenix.Animation();
@@ -490,30 +504,29 @@ namespace Phoenix
             //Positioning and other tests
             if (currentKeyboardState.IsKeyDown(Keys.P))
             {
-                playerPokemonObject.train("all");
-                playerPokemonObject.status = "normal";
-                Console.WriteLine(playerPokemonObject.atk + " " + playerPokemonObject.satk + " " + playerPokemonObject.def + " " + playerPokemonObject.sdef + " " + playerPokemonObject.evade + " " + playerPokemonObject.spd);
+                Console.WriteLine("Player: " + playerPokemonObject.atk + " " + playerPokemonObject.satk + " " + playerPokemonObject.def + " " + playerPokemonObject.sdef + " " + playerPokemonObject.evade + " " + playerPokemonObject.spd + " " + playerPokemonObject.MaxHP + " ");
+                Console.WriteLine("Enemy: " + enemyPokemonObject.atk + " " + enemyPokemonObject.satk + " " + enemyPokemonObject.def + " " + enemyPokemonObject.sdef + " " + enemyPokemonObject.evade + " " + enemyPokemonObject.spd + " " + enemyPokemonObject.MaxHP + " ");
             }
             /*
             if (currentKeyboardState.IsKeyDown(Keys.Up))
             {
-                enemyBattleStatusRect.Y--;
-                Console.WriteLine(enemyBattleStatusRect.X + " " + enemyBattleStatusRect.Y);
+                enemyPokemonGenderRect.Y--;
+                Console.WriteLine(enemyPokemonGenderRect.X + " " + enemyPokemonGenderRect.Y);
             }
             if (currentKeyboardState.IsKeyDown(Keys.Down))
             {
-                enemyBattleStatusRect.Y++;
-                Console.WriteLine(enemyBattleStatusRect.X + " " + enemyBattleStatusRect.Y);
+                enemyPokemonGenderRect.Y++;
+                Console.WriteLine(enemyPokemonGenderRect.X + " " + enemyPokemonGenderRect.Y);
             }
             if (currentKeyboardState.IsKeyDown(Keys.Left))
             {
-                enemyBattleStatusRect.X--;
-                Console.WriteLine(enemyBattleStatusRect.X + " " + enemyBattleStatusRect.Y);
+                enemyPokemonGenderRect.X--;
+                Console.WriteLine(enemyPokemonGenderRect.X + " " + enemyPokemonGenderRect.Y);
             }
             if (currentKeyboardState.IsKeyDown(Keys.Right))
             {
-                enemyBattleStatusRect.X++;
-                Console.WriteLine(enemyBattleStatusRect.X + " " + enemyBattleStatusRect.Y);
+                enemyPokemonGenderRect.X++;
+                Console.WriteLine(enemyPokemonGenderRect.X + " " + enemyPokemonGenderRect.Y);
             }
             */
             //End Positioning
@@ -546,6 +559,7 @@ namespace Phoenix
                 battleMenuSelection = "fight";
                 menuSelectorRect.X = 110;
                 menuSelectorRect.Y = 274;
+                netAffinityGain = 0;
                 previousGameTime = DateTime.Now.Ticks;
             }
             else if (currentKeyboardState.IsKeyDown(Keys.E) && battleState == BattleState.runFail && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
@@ -560,7 +574,7 @@ namespace Phoenix
             {
                 battleMenuDepth = BattleMenuDepth.initial;
             }
-            if (currentKeyboardState.IsKeyDown(Keys.Down) && battleMenuDepth == BattleMenuDepth.fight && selectedMove != "move3" && selectedMove != "move4" && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            if ((currentKeyboardState.IsKeyDown(Keys.Down) || currentKeyboardState.IsKeyDown(Keys.S)) && battleMenuDepth == BattleMenuDepth.fight && selectedMove != "move3" && selectedMove != "move4" && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
             {
                 if (playerPokemonObject.move3.name != "NONE" && selectedMove == "move1")
                 {
@@ -576,7 +590,7 @@ namespace Phoenix
                 }
                 previousGameTime = DateTime.Now.Ticks;
             }
-            if (currentKeyboardState.IsKeyDown(Keys.Up) && battleMenuDepth == BattleMenuDepth.fight && selectedMove != "move1" && selectedMove != "move2" && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            if ((currentKeyboardState.IsKeyDown(Keys.Up) || currentKeyboardState.IsKeyDown(Keys.W)) && battleMenuDepth == BattleMenuDepth.fight && selectedMove != "move1" && selectedMove != "move2" && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
             {
                 if (playerPokemonObject.move1.name != "NONE" && selectedMove == "move3")
                 {
@@ -592,7 +606,7 @@ namespace Phoenix
                 }
                 previousGameTime = DateTime.Now.Ticks;
             }
-            if (currentKeyboardState.IsKeyDown(Keys.Left) && battleMenuDepth == BattleMenuDepth.fight && selectedMove != "move1" && selectedMove != "move3" && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            if ((currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A)) && battleMenuDepth == BattleMenuDepth.fight && selectedMove != "move1" && selectedMove != "move3" && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
             {
                 if (playerPokemonObject.move1.name != "NONE" && selectedMove == "move2")
                 {
@@ -608,7 +622,7 @@ namespace Phoenix
                 }
                 previousGameTime = DateTime.Now.Ticks;
             }
-            if (currentKeyboardState.IsKeyDown(Keys.Right) && battleMenuDepth == BattleMenuDepth.fight && selectedMove != "move2" && selectedMove != "move4" && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            if ((currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D)) && battleMenuDepth == BattleMenuDepth.fight && selectedMove != "move2" && selectedMove != "move4" && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
             {
                 if (playerPokemonObject.move2.name != "NONE" && selectedMove == "move1")
                 {
@@ -624,7 +638,7 @@ namespace Phoenix
                 }
                 previousGameTime = DateTime.Now.Ticks;
             }
-            if (currentKeyboardState.IsKeyDown(Keys.E) && battleMenuDepth == BattleMenuDepth.fight && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            if (currentKeyboardState.IsKeyDown(Keys.E) && battleMenuDepth == BattleMenuDepth.fight && battleState != BattleState.enemyFaint && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
             {
                 processMoveSelection(selectedMove, gameTime);
                 previousGameTime = DateTime.Now.Ticks;
@@ -635,29 +649,69 @@ namespace Phoenix
                 processEnemyMoves();
             }
             //Movement keys for initial battle menu
-            if (currentKeyboardState.IsKeyDown(Keys.Down) && battleMenuSelection != "item" && battleMenuSelection != "run" && battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial)
+            if ((currentKeyboardState.IsKeyDown(Keys.Down) || currentKeyboardState.IsKeyDown(Keys.S)) && battleMenuSelection != "item" && battleMenuSelection != "run" && battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial)
             {
                 menuSelectorRect.Y += 41;
                 if (battleMenuSelection == "fight") battleMenuSelection = "item";
                 else battleMenuSelection = "run";
             }
-            else if (currentKeyboardState.IsKeyDown(Keys.Up) && battleMenuSelection != "fight" && battleMenuSelection != "pokemon" && battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial)
+            else if ((currentKeyboardState.IsKeyDown(Keys.Up) || currentKeyboardState.IsKeyDown(Keys.W)) && battleMenuSelection != "fight" && battleMenuSelection != "pokemon" && battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial)
             {
                 menuSelectorRect.Y -= 41;
                 if (battleMenuSelection == "item") battleMenuSelection = "fight";
                 else battleMenuSelection = "pokemon";
             }
-            else if (currentKeyboardState.IsKeyDown(Keys.Left) && battleMenuSelection != "fight" && battleMenuSelection != "item" && battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial)
+            else if ((currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A)) && battleMenuSelection != "fight" && battleMenuSelection != "item" && battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial)
             {
                 menuSelectorRect.X -= 105;
                 if (battleMenuSelection == "pokemon") battleMenuSelection = "fight";
                 else battleMenuSelection = "item";
             }
-            else if (currentKeyboardState.IsKeyDown(Keys.Right) && battleMenuSelection != "pokemon" && battleMenuSelection != "run" && battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial)
+            else if ((currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D)) && battleMenuSelection != "pokemon" && battleMenuSelection != "run" && battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial)
             {
                 menuSelectorRect.X += 105;
                 if (battleMenuSelection == "fight") battleMenuSelection = "pokemon";
                 else battleMenuSelection = "run";
+            }
+            if(battleState == BattleState.enemyFaint && currentKeyboardState.IsKeyDown(Keys.E) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay && enemyPokemonRect.Height <= 0)
+            {
+                //Trigger logic for trainer battles here
+
+
+                //End the battle below
+                savePokemon();
+                netAffinityGain = 0;
+                gameState = GameState.ready;
+                battleMenuDepth = BattleMenuDepth.initial;
+                battleState = BattleState.begin;
+                battleMenuSelection = "fight";
+                menuSelectorRect.X = 110;
+                menuSelectorRect.Y = 274;
+                enemyPokemonRect.Height = 192;
+                enemyPokemonRect.Y = 45;
+                didLevelUp = false;
+                previousGameTime = DateTime.Now.Ticks;
+            }
+            if (battleState == BattleState.playerFaint && currentKeyboardState.IsKeyDown(Keys.E) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay && playerPokemonRect.Height <= 0)
+            {
+                //Trigger logic for selecting next pokemon here
+
+                //Test code to fully heal pokemon until the pokemon switch code is operational
+                playerPokemonObject.fullHeal();
+
+                //End the battle
+                savePokemon();
+                netAffinityGain = 0;
+                gameState = GameState.ready;
+                battleMenuDepth = BattleMenuDepth.initial;
+                battleState = BattleState.begin;
+                battleMenuSelection = "fight";
+                menuSelectorRect.X = 110;
+                menuSelectorRect.Y = 274;
+                playerPokemonRect.Height = 288;
+                playerPokemonRect.Y = 140;
+                didLevelUp = false;
+                previousGameTime = DateTime.Now.Ticks;
             }
         }
         //Function to update the splash screen
@@ -880,7 +934,6 @@ namespace Phoenix
                         if (rng.Next(1, BATTLECHANCE) + 1 == BATTLECHANCE)//Default 1,10
                         {
                             //local variables
-                            string playerShinyString = "";
                             battleMenuSelection = "fight";
                             //Set the battle state
 
@@ -905,14 +958,19 @@ namespace Phoenix
                                 }
                                 else totalWeight -= encounters[x][1];
                             }
-                            enemyPokemonObject = pokemon.generatePokemon(encounterID.ToString(), 1);
+                            enemyPokemonObject = pokemon.generatePokemon(encounterID.ToString());
                             playerPokemonObject = playerBox.ElementAt(currentPokemon);
                             //Determine if player's pokemon is shiny
+                            shinyString = "";
+                            femaleString = "";
+                            playerFemaleString = "";
+                            playerShinyString = "";
                             if (playerPokemonObject.isShiny) playerShinyString = "_shiny";
                             if (enemyPokemonObject.isShiny) shinyString = "_shiny";
-                            else shinyString = "";
-                            playerPokemon = Content.Load<Texture2D>("sprites/pokemon/back" + playerShinyString + "/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix);
-                            enemyPokemon = Content.Load<Texture2D>("sprites/pokemon/front" + shinyString + "/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix);
+                            if (playerPokemonObject.isFemale && playerPokemonObject.hasFemaleSprite) playerFemaleString = "_female";
+                            if (enemyPokemonObject.isFemale && enemyPokemonObject.hasFemaleSprite) femaleString = "_female";
+                            playerPokemon = Content.Load<Texture2D>("sprites/pokemon/back" + playerFemaleString + "" + playerShinyString + "/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix);
+                            enemyPokemon = Content.Load<Texture2D>("sprites/pokemon/front" + femaleString + "" + shinyString + "/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix);
                             mapPaths = maps.getMap(mapEnvironmentType, false);
                             battleBG = Content.Load<Texture2D>("battle/backgrounds/" + mapPaths[0]);
                             battlePlace = Content.Load<Texture2D>("battle/backgrounds/" + mapPaths[1]);
@@ -1322,6 +1380,7 @@ namespace Phoenix
 
             if (playerPokemonObject.status != "normal" && previousBattleState != BattleState.playerConditions)
             {
+                previousBattleState = battleState;
                 applyPlayerConditions();
                 setConditionResult();
             }
@@ -1331,6 +1390,7 @@ namespace Phoenix
                 {
                     failedSkill = moveToUse.name;
                     moveToUse = pokemon.blank;
+                    type = 0;
                 }
                 else
                 {
@@ -1350,108 +1410,139 @@ namespace Phoenix
         //Process enemy move commands here
         public void processEnemyMoves()
         {
-            int numMoves = 4;
-            selectedEnemyMove = pokemon.NONE;
-            if(enemyPokemonObject.move4.name == "NONE")
+            double atkDefResult = 0;
+            double damage = 0;
+
+            if (previousBattleState != BattleState.enemyConditions)
             {
-                numMoves = 3;
-                if(enemyPokemonObject.move3.name == "NONE")
+                int numMoves = 4;
+                selectedEnemyMove = pokemon.NONE;
+                if (enemyPokemonObject.move4.name == "NONE")
                 {
-                    numMoves = 2;
-                    if(enemyPokemonObject.move2.name == "NONE")
+                    numMoves = 3;
+                    if (enemyPokemonObject.move3.name == "NONE")
                     {
-                        numMoves = 1;
-                        if(enemyPokemonObject.move1.name == "NONE")
+                        numMoves = 2;
+                        if (enemyPokemonObject.move2.name == "NONE")
                         {
+                            numMoves = 1;
+                            if (enemyPokemonObject.move1.name == "NONE")
+                            {
+                            }
                         }
                     }
                 }
-            }
-            switch (rng.Next(0, numMoves) + 1)
-            {
-                case 1:
-                    selectedEnemyMove = enemyPokemonObject.move1;
-                    break;
-                case 2:
-                    selectedEnemyMove = enemyPokemonObject.move2;
-                    break;
-                case 3:
-                    selectedEnemyMove = enemyPokemonObject.move3;
-                    break;
-                case 4:
-                    selectedEnemyMove = enemyPokemonObject.move4;
-                    break;
-                default:
-                    //What other move slots are there???
-                    break;
-            }
-
-            type = -1;
-            int atkDefResult = 0;
-            double damage = 0;
-            switch (selectedEnemyMove.type)
-            {
-                case "Normal":
-                    type = 0;
-                    break;
-                case "Flying":
-                    type = 1;
-                    break;
-                case "Fighting":
-                    type = 2;
-                    break;
-                case "Grass":
-                    type = 3;
-                    break;
-                case "Poison":
-                    type = 4;
-                    break;
-                case "Fire":
-                    type = 5;
-                    break;
-            }
-
-            if (!didHit(false))
-            {
-                failedSkill = selectedEnemyMove.name;
-                selectedEnemyMove = pokemon.blank;
-            }
-            else
-            {
-                switch (selectedEnemyMove.effect)
+                switch (rng.Next(0, numMoves) + 1)
                 {
                     case 1:
-                        atkDefResult = enemyPokemonObject.atk - playerPokemonObject.def;
-                        if (atkDefResult <= 1) atkDefResult = 1;//Landed hits do at least 1 damage
-                        damage = (enemyPokemonObject.attackAffinity[type] / playerPokemonObject.defenseAffinity[type]) * atkDefResult * selectedEnemyMove.magnitude;
+                        selectedEnemyMove = enemyPokemonObject.move1;
                         break;
-                    case 11:
-                        if (playerPokemonObject.status == "normal") playerPokemonObject.status = "sleep";
+                    case 2:
+                        selectedEnemyMove = enemyPokemonObject.move2;
                         break;
-                    case 13:
-                        if (playerPokemonObject.status == "normal") playerPokemonObject.status = "paralyze";
+                    case 3:
+                        selectedEnemyMove = enemyPokemonObject.move3;
                         break;
-                    case 15:
-                        if (playerPokemonObject.status == "normal") playerPokemonObject.status = "poison";
+                    case 4:
+                        selectedEnemyMove = enemyPokemonObject.move4;
+                        break;
+                    default:
+                        //What other move slots are there???
                         break;
                 }
+                type = -1;
 
-                applyAfinity(type, 1);
-                netDamage = damage;
-                playerPokemonObject.HP -= (int)netDamage;
-                Console.WriteLine("Enemy Damage: " + netDamage);
+                switch (selectedEnemyMove.type)
+                {
+                    case "Normal":
+                        type = 0;
+                        break;
+                    case "Flying":
+                        type = 1;
+                        break;
+                    case "Fighting":
+                        type = 2;
+                        break;
+                    case "Grass":
+                        type = 3;
+                        break;
+                    case "Poison":
+                        type = 4;
+                        break;
+                    case "Fire":
+                        type = 5;
+                        break;
+                }
             }
 
+            if (enemyPokemonObject.status != "normal" && previousBattleState != BattleState.enemyConditions)
+            {
+                previousBattleState = battleState;
+                applyEnemyConditions();
+                setConditionResult();
+            }
 
-            reverseAnimation = false;
-            enemyAnimationComplete = false;
-            previousBattleState = battleState;
-            animationTime = DateTime.Now.Ticks;
-            battleState = BattleState.displayingResult;
-            previousGameTime = DateTime.Now.Ticks;
-            didDisplayEffectiveness = false;
-            battleMenuDepth = BattleMenuDepth.waiting;
-            previousGameTime = DateTime.Now.Ticks;
+            else if ((enemyPokemonObject.status != "normal" && !paralyzeSkip) || enemyPokemonObject.status == "normal")
+            {
+                if (!didHit(false))
+                {
+                    failedSkill = selectedEnemyMove.name;
+                    selectedEnemyMove = pokemon.blank;
+                    type = 0;
+                }
+                else
+                {
+                    switch (selectedEnemyMove.effect)
+                    {
+                        case 1:
+                            atkDefResult = ((double)enemyPokemonObject.atk / (double)playerPokemonObject.def);
+                            if (atkDefResult <= 1) atkDefResult = 1;//No Negative Multipliers
+                            damage = ((double)enemyPokemonObject.attackAffinity[type] / (double)playerPokemonObject.defenseAffinity[type]) * atkDefResult * selectedEnemyMove.magnitude;
+                            break;
+                        case 11:
+                            if (playerPokemonObject.status == "normal") playerPokemonObject.status = "sleep";
+                            break;
+                        case 13:
+                            if (playerPokemonObject.status == "normal") playerPokemonObject.status = "paralyze";
+                            break;
+                        case 15:
+                            if (playerPokemonObject.status == "normal") playerPokemonObject.status = "poison";
+                            break;
+                    }
+
+                    applyAfinity(type);
+                    netDamage = damage;
+                    if ((int)netDamage < 1) netDamage++;
+                    if (selectedEnemyMove.magnitude == 0) netDamage = 0;
+                    playerPokemonObject.HP -= (int)netDamage;
+                    if (playerPokemonObject.HP < 0) playerPokemonObject.HP = 0;
+                    Console.WriteLine("Enemy Damage: " + netDamage);
+
+                    reverseAnimation = false;
+                    enemyAnimationComplete = false;
+                    previousBattleState = battleState;
+                    animationTime = DateTime.Now.Ticks;
+                    battleState = BattleState.displayingResult;
+                    previousGameTime = DateTime.Now.Ticks;
+                    didDisplayEffectiveness = false;
+                    battleMenuDepth = BattleMenuDepth.waiting;
+                    previousGameTime = DateTime.Now.Ticks;
+                }
+            }
+            else if(paralyzeSkip)
+            {
+                Console.WriteLine("Setting Skip to False");
+                paralyzeSkip = false;
+                reverseAnimation = false;
+                enemyAnimationComplete = false;
+                previousBattleState = battleState;
+                animationTime = DateTime.Now.Ticks;
+                battleState = BattleState.displayingResult;
+                previousGameTime = DateTime.Now.Ticks;
+                didDisplayEffectiveness = false;
+                battleMenuDepth = BattleMenuDepth.waiting;
+                previousGameTime = DateTime.Now.Ticks;
+            }
         }
 
         //Determine if the player hit
@@ -1481,7 +1572,7 @@ namespace Phoenix
         public void playerMoveResult()
         {
             type = -1;
-            int atkDefResult = 0;
+            double atkDefResult = 0;
             double damage = 0;
             switch (moveToUse.type)
             {
@@ -1507,9 +1598,9 @@ namespace Phoenix
 
             switch (moveToUse.effect) {
                 case 1:
-                    atkDefResult = playerPokemonObject.atk - enemyPokemonObject.def;
-                    if (atkDefResult <= 1) atkDefResult = 1;//Landed hits do at least 1 damage
-                    damage = (playerPokemonObject.attackAffinity[type] / enemyPokemonObject.defenseAffinity[type]) * atkDefResult * moveToUse.magnitude;
+                    atkDefResult = ((double)playerPokemonObject.atk /  (double)enemyPokemonObject.def);
+                    if (atkDefResult <= 1) atkDefResult = 1;//no negative multipliers
+                    damage = ((double)playerPokemonObject.attackAffinity[type] / (double)enemyPokemonObject.defenseAffinity[type]) * atkDefResult * moveToUse.magnitude;
                     break;
                 case 11:
                     if (enemyPokemonObject.status == "normal") enemyPokemonObject.status = "sleep";
@@ -1522,10 +1613,12 @@ namespace Phoenix
                     break;
             }
 
-            applyAfinity(type, 1);
+            applyAfinity(type);
             netDamage = damage;
+            if ((int)netDamage < 1) netDamage++;
+            if (moveToUse.magnitude == 0) netDamage = 0;
             enemyPokemonObject.HP -= (int)netDamage;
-            
+            if (enemyPokemonObject.HP < 0) enemyPokemonObject.HP = 0;
             Console.WriteLine("Player Damage: " + netDamage + "Enemy HP: " + enemyPokemonObject.HP);
 
         }
@@ -1542,8 +1635,8 @@ namespace Phoenix
                 switch (playerPokemonObject.status)
                 {
                     case "poison":
-                        damage = (int)((double)playerPokemonObject.MaxHP * 0.05) + 1;
                         battleConditionEffectString = playerPokemonObject.name + " has suffered poison damage!";
+                        damage = (int)((double)playerPokemonObject.MaxHP * 0.05) + 1;
                         playerPokemonObject.HP -= damage;
                         type = 4;
                         break;
@@ -1575,6 +1668,9 @@ namespace Phoenix
                         if (conditionRNG > 50)
                         {
                             battleConditionEffectString = playerPokemonObject.name + " hurt iself in it's confusion!";
+                            damage = (int)((double)playerPokemonObject.MaxHP * 0.1) + 1;
+                            playerPokemonObject.HP -= damage;
+                            type = 1;
                             paralyzeSkip = true;
                         }
                         else
@@ -1599,8 +1695,8 @@ namespace Phoenix
                         }
                         else
                         {
-                            damage = (int)((double)playerPokemonObject.MaxHP * 0.1) + 1;
                             battleConditionEffectString = playerPokemonObject.name + " has suffered burning damage!";
+                            damage = (int)((double)playerPokemonObject.MaxHP * 0.1) + 1;
                             playerPokemonObject.HP -= damage;
                             type = 5;
                         }
@@ -1613,30 +1709,161 @@ namespace Phoenix
         public void applyEnemyConditions()
         {
             //Conditional damages here
+
+            int conditionRNG = rng.Next(0, 100);//Default 0, 100
+            //Conditional damages here
+            if (enemyPokemonObject.status != "normal")
+            {
+                previousGameTime = DateTime.Now.Ticks;
+                int damage;
+                switch (enemyPokemonObject.status)
+                {
+                    case "poison":
+                        battleConditionEffectString = enemyPokemonObject.name + " has suffered poison damage!";
+                        damage = (int)((double)enemyPokemonObject.MaxHP * 0.05) + 1;
+                        enemyPokemonObject.HP -= damage;
+                        type = 4;
+                        break;
+                    case "paralyze":
+                        if (conditionRNG <= 50)
+                        {
+                            battleConditionEffectString = enemyPokemonObject.name + " is paralyzed and cannot move!";
+                            paralyzeSkip = true;
+                        }
+                        else
+                        {
+                            battleConditionEffectString = "";
+                            paralyzeSkip = false;
+                        }
+                        break;
+                    case "sleep":
+                        if (conditionRNG > 30)
+                        {
+                            battleConditionEffectString = enemyPokemonObject.name + " is fast asleep...";
+                            paralyzeSkip = true;
+                        }
+                        else
+                        {
+                            battleConditionEffectString = " has waken up!";
+                            paralyzeSkip = false;
+                        }
+                        break;
+                    case "confuse":
+                        if (conditionRNG > 50)
+                        {
+                            battleConditionEffectString = enemyPokemonObject.name + " hurt iself in it's confusion!";
+                            damage = (int)((double)enemyPokemonObject.MaxHP * 0.1) + 1;
+                            enemyPokemonObject.HP -= damage;
+                            type = 1;
+                            paralyzeSkip = true;
+                            cureCondition = false;
+                        }
+                        else
+                        {
+                            cureCondition = false;
+                            if (rng.Next(0, 100) >= 50)
+                            {
+                                battleConditionEffectString = " has snapped out of it's confusion!";
+                                cureCondition = true;
+                            }
+                            paralyzeSkip = false;
+                        }
+                        break;
+                    case "frozen":
+                        battleConditionEffectString = enemyPokemonObject.name + " is frozen solid!";
+                        paralyzeSkip = true;
+                        break;
+                    case "burn":
+                        if (conditionRNG <= 50)
+                        {
+                            Console.WriteLine(conditionRNG);
+                            battleConditionEffectString = enemyPokemonObject.name + " is no longer on fire.";
+                            cureCondition = true;
+                        }
+                        else
+                        {
+                            battleConditionEffectString = enemyPokemonObject.name + " has suffered burning damage!";
+                            damage = (int)((double)enemyPokemonObject.MaxHP * 0.1) + 1;
+                            enemyPokemonObject.HP -= damage;
+                            cureCondition = false;
+                            type = 5;
+                        }
+                        break;
+                }
+            }
+
         }
 
         //Apply Afinity
-        public void applyAfinity(int type, int afininity)
+        public void applyAfinity(int type)
         {
-            //1 = attack
-            //2 = defense
+            //TYPE
+            //1 = attackPKMN
+            //2 = defensePKMN
             //3 = trainer
-            try
+            if (battleState == BattleState.playerTurn)
             {
-                //Apply afininities
+                Console.WriteLine("Attack affinity points applied! " + type + " " + playerPokemonObject.attackAffinity[type]);
+                netAffinityGain++;
+                playerPokemonObject.totalAffinity++;
+                playerPokemonObject.attackAffinity[type]++;
+                enemyPokemonObject.defenseAffinity[type]++;
+                //TRAINER AFFINITY[TYPE]++
             }
-            catch(Exception ex)
+            else
             {
-                Console.WriteLine(ex);
+                Console.WriteLine("Defense affinity points applied!" + type + " " + playerPokemonObject.defenseAffinity[type]);
+                netAffinityGain++;
+                playerPokemonObject.totalAffinity++;
+                playerPokemonObject.defenseAffinity[type]++;
+                enemyPokemonObject.attackAffinity[type]++;
             }
+            
         }
 
         //Set Condition Result
         public void setConditionResult()
         {
-            Console.WriteLine(previousBattleState);
-            battleState = BattleState.playerConditions;
-            previousBattleState = BattleState.playerConditions;
+            if(previousBattleState == BattleState.playerTurn)
+            {
+                battleState = BattleState.playerConditions;
+                previousBattleState = BattleState.playerConditions;
+            }
+            else if (previousBattleState == BattleState.enemyTurn)
+            {
+                battleState = BattleState.enemyConditions;
+                previousBattleState = BattleState.enemyConditions;
+            }
+        }
+
+        //Level up a stat
+        public void doLevelStat(string stat)
+        {
+            switch (stat)
+            {
+                case "ATK":
+                    playerPokemonObject.atk++;
+                    break;
+                case "DEF":
+                    playerPokemonObject.def++;
+                    break;
+                case "S.ATK":
+                    playerPokemonObject.satk++;
+                    break;
+                case "S.DEF":
+                    playerPokemonObject.sdef++;
+                    break;
+                case "EVD":
+                    playerPokemonObject.evade++;
+                    break;
+                case "SPD":
+                    playerPokemonObject.spd++;
+                    break;
+                case "HP":
+                    playerPokemonObject.MaxHP++;
+                    playerPokemonObject.HP++;
+                    break;
+            }
         }
 
         //Drawing functions below avoid writing new functions not draw or animation related
@@ -1646,12 +1873,14 @@ namespace Phoenix
             spriteBatch.Draw(battlePlace, battlePlaceRect, Color.White);
             spriteBatch.Draw(enemyPokemon, enemyPokemonRect, Color.White);
             spriteBatch.Draw(playerPokemon, playerPokemonRect, Color.White);
-            refreshHP();
+            if (battleState == BattleState.begin) refreshHP(true);
+            else refreshHP(false);
             drawConditions();
+            drawGender();
             //spriteBatch.DrawString(font6, "HP: " + enemyPokemonObject.HP + "/" + enemyPokemonObject.MaxHP, new Vector2(0, 0), Color.White);//Enable to test enemy hp
             spriteBatch.Draw(DialogueTexture, DialogueRectangle, Color.White);//Dialogue
             if (battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.initial) drawBattleMenu();
-            if (battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.fight) drawMoves();
+            
             if (battleState == BattleState.begin || battleState == BattleState.runFail || battleState == BattleState.runSucceed) spriteBatch.DrawString(font, encounterText, new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
             if (battleState == BattleState.displayingResult && previousBattleState == BattleState.playerTurn)
             {
@@ -1665,26 +1894,80 @@ namespace Phoenix
             }
             if (battleState == BattleState.animatingPlayer) animatePlayer(moveToUse.name, gameTime);
             if (battleState == BattleState.animatingEnemy) animateEnemy(selectedEnemyMove.name, gameTime);
-            if (battleState == BattleState.playerConditions || previousBattleState == BattleState.playerConditions)
+            if (battleState == BattleState.playerConditions || previousBattleState == BattleState.playerConditions) drawMoveResult(battleConditionEffectString);
+            if (battleState == BattleState.enemyConditions || previousBattleState == BattleState.enemyConditions) drawMoveResult(battleConditionEffectString);
+            if (battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.fight) drawMoves();
+            if (battleState == BattleState.enemyFaint) drawEnemyFaint();
+            if (battleState == BattleState.playerFaint) drawPlayerFaint();
+        }
+
+        //Draw Gender
+        public void drawGender()
+        {
+            if (enemyPokemonObject.isFemale) enemyPokemonGender = Content.Load<Texture2D>("battle/components/female");
+            else enemyPokemonGender = Content.Load<Texture2D>("battle/components/male");
+            if (playerPokemonObject.isFemale) playerPokemonGender = Content.Load<Texture2D>("battle/components/female");
+            else playerPokemonGender = Content.Load<Texture2D>("battle/components/male");
+            spriteBatch.Draw(enemyPokemonGender, enemyPokemonGenderRect, Color.White);
+            spriteBatch.Draw(playerPokemonGender, playerPokemonGenderRect, Color.White);
+        }
+
+        //Draw enemy faint
+        public void drawEnemyFaint()
+        {
+            spriteBatch.DrawString(font, "Enemy " + enemyPokemonObject.name + " has fainted!", new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
+            spriteBatch.DrawString(font, playerPokemonObject.name + " has gained " + netAffinityGain + " affinity points!", new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
+            if(didLevelUp) spriteBatch.DrawString(font, playerPokemonObject.name + " has gained 1 point of " + leveledStat + "!", new Vector2(dialogueX + 15, dialogueY + 41), Color.Black);
+            if (playerPokemonObject.totalAffinity >= 50)
             {
-                drawMoveResult(battleConditionEffectString);
+                leveledStat = levelup.levelUp();
+                didLevelUp = true;
+                playerPokemonObject.totalAffinity -= 50;
+                doLevelStat(leveledStat);
+            }
+            if (DateTime.Now.Ticks >= previousGameTime + KeyboardDelay && enemyPokemonRect.Height > 0)
+            {
+                enemyPokemonRect.Height -= 5;
+                enemyPokemonRect.Y += 4;
+            }
+        }
+
+        //Draw player faint
+        public void drawPlayerFaint()
+        {
+            spriteBatch.DrawString(font, playerPokemonObject.name + " has fainted!", new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
+            spriteBatch.DrawString(font, playerPokemonObject.name + " has gained " + netAffinityGain + " affinity points!", new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
+            if(didLevelUp) spriteBatch.DrawString(font, playerPokemonObject.name + " has gained 1 point of " + leveledStat + "!", new Vector2(dialogueX + 15, dialogueY + 41), Color.Black);
+            if (playerPokemonObject.totalAffinity >= 50)
+            {
+                leveledStat = levelup.levelUp();
+                didLevelUp = true;
+                playerPokemonObject.totalAffinity -= 50;
+                doLevelStat(leveledStat);
+            }
+            if (DateTime.Now.Ticks >= previousGameTime + KeyboardDelay && playerPokemonRect.Height > 0)
+            {
+                playerPokemonRect.Height -= 5;
+                playerPokemonRect.Y += 4;
             }
         }
 
         //Refresh hp bars
-        public void refreshHP()
+        public void refreshHP(bool recalculate)
         {
-            enemyHPWidth = (int)(142 * ((double)enemyPokemonObject.HP / (double)enemyPokemonObject.MaxHP));
-            playerHPWidth = (int)(142 * ((double)playerPokemonObject.HP / (double)playerPokemonObject.MaxHP));
-            if (playerHPWidth > 71) playerHP = Content.Load<Texture2D>("battle/components/hp_full");
-            else if (playerHPWidth <= 71 && playerHPWidth > 21) playerHP = Content.Load<Texture2D>("battle/components/hp_half");
-            else if (playerHPWidth <= 21) playerHP = Content.Load<Texture2D>("battle/components/hp_critical");
-            playerHPRect.Width = playerHPWidth;
-            if (enemyHPWidth > 71) enemyHP = Content.Load<Texture2D>("battle/components/hp_full");
-            else if (enemyHPWidth <= 71 && enemyHPWidth > 21) enemyHP = Content.Load<Texture2D>("battle/components/hp_half");
-            else if (enemyHPWidth <= 21) enemyHP = Content.Load<Texture2D>("battle/components/hp_critical");
-            enemyHPRect.Width = enemyHPWidth;
-
+            if (recalculate)
+            {
+                enemyHPWidth = (int)(142 * ((double)enemyPokemonObject.HP / (double)enemyPokemonObject.MaxHP));
+                playerHPWidth = (int)(142 * ((double)playerPokemonObject.HP / (double)playerPokemonObject.MaxHP));
+                if (playerHPWidth > 71) playerHP = Content.Load<Texture2D>("battle/components/hp_full");
+                else if (playerHPWidth <= 71 && playerHPWidth > 21) playerHP = Content.Load<Texture2D>("battle/components/hp_half");
+                else if (playerHPWidth <= 21) playerHP = Content.Load<Texture2D>("battle/components/hp_critical");
+                playerHPRect.Width = playerHPWidth;
+                if (enemyHPWidth > 71) enemyHP = Content.Load<Texture2D>("battle/components/hp_full");
+                else if (enemyHPWidth <= 71 && enemyHPWidth > 21) enemyHP = Content.Load<Texture2D>("battle/components/hp_half");
+                else if (enemyHPWidth <= 21) enemyHP = Content.Load<Texture2D>("battle/components/hp_critical");
+                enemyHPRect.Width = enemyHPWidth;
+            }
             spriteBatch.Draw(hpBack, enemyHPBackRect, Color.White);
             spriteBatch.Draw(enemyHP, enemyHPRect, Color.White);
             spriteBatch.Draw(enemyHPPanel, enemyHPPanelRect, Color.White);
@@ -1694,6 +1977,17 @@ namespace Phoenix
             spriteBatch.Draw(playerHPPanel, playerHPPanelRect, Color.White);
             spriteBatch.DrawString(font6, playerPokemonObject.name, playerNamePos, Color.White);
             spriteBatch.DrawString(font6, "HP: " + playerPokemonObject.HP + "/" + playerPokemonObject.MaxHP, playerHPNumbers, Color.White);
+
+            if (enemyPokemonObject.HP <= 0 && battleState != BattleState.enemyFaint && recalculate)
+            {
+                previousBattleState = BattleState.enemyFaint;
+                battleState = BattleState.enemyFaint;
+            }
+            if(playerPokemonObject.HP <= 0 && battleState != BattleState.playerFaint && recalculate)
+            {
+                previousBattleState = BattleState.playerFaint;
+                battleState = BattleState.playerFaint;
+            }
         }
 
         //Draw battle menu
@@ -1764,38 +2058,32 @@ namespace Phoenix
             if (currentPage - 1 < dialogueContent.Count) spriteBatch.DrawString(font, dialogueContent[currentPage - 1], new Vector2(dialogueX + 15, dialogueY + 73), Color.Black);
         }
 
-        //Draw condition results
-        public void drawConditionResult()
-        {
-
-        }
-
         //Draw battle results
         public void drawMoveResult(string result)
         {
-            if (battleState != BattleState.playerConditions)spriteBatch.DrawString(font, result, new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
+            if (battleState != BattleState.playerConditions && battleState != BattleState.enemyConditions)spriteBatch.DrawString(font, result, new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
                 if(previousBattleState == BattleState.playerTurn && battleState != BattleState.playerConditions)
                 {
-                    if(playerPokemonObject.attackAffinity[type] / enemyPokemonObject.defenseAffinity[type] >= 1.5)
+                    if((double)playerPokemonObject.attackAffinity[type] / (double)enemyPokemonObject.defenseAffinity[type] >= 1.5)
                     {
                         spriteBatch.DrawString(font, "It was super effective!", new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
                         if(!didDisplayEffectiveness)previousGameTime = DateTime.Now.Ticks;
                     }
-                    else if(playerPokemonObject.attackAffinity[type] / enemyPokemonObject.defenseAffinity[type] <= 0.5)
+                    else if((double)playerPokemonObject.attackAffinity[type] / (double)enemyPokemonObject.defenseAffinity[type] <= 0.5)
                     {
                         spriteBatch.DrawString(font, "It was not very effective!", new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
                         if (!didDisplayEffectiveness) previousGameTime = DateTime.Now.Ticks;
                     }
                 didDisplayEffectiveness = true;
                 }
-                if(previousBattleState == BattleState.enemyTurn)
+                if(previousBattleState == BattleState.enemyTurn && battleState != BattleState.enemyConditions)
                 {
-                    if (enemyPokemonObject.attackAffinity[type] / playerPokemonObject.defenseAffinity[type] >= 1.5)
+                    if ((double)enemyPokemonObject.attackAffinity[type] / (double)playerPokemonObject.defenseAffinity[type] >= 1.5)
                     {
                         spriteBatch.DrawString(font, "It was super effective!", new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
                         if (!didDisplayEffectiveness) previousGameTime = DateTime.Now.Ticks;
                     }
-                    else if (enemyPokemonObject.attackAffinity[type] / playerPokemonObject.defenseAffinity[type] <= 0.5)
+                    else if ((double)enemyPokemonObject.attackAffinity[type] / (double)playerPokemonObject.defenseAffinity[type] <= 0.5)
                     {
                         spriteBatch.DrawString(font, "It was not very effective!", new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
                         if (!didDisplayEffectiveness) previousGameTime = DateTime.Now.Ticks;
@@ -1806,69 +2094,107 @@ namespace Phoenix
                 {
                     battleState = BattleState.animatingPlayer;
                 }
-                else if (didDisplayEffectiveness && DateTime.Now.Ticks > previousGameTime + KeyboardDelay * BATTLESPEED)
+                else if (previousBattleState == BattleState.enemyTurn && didDisplayEffectiveness && DateTime.Now.Ticks > previousGameTime + KeyboardDelay * BATTLESPEED)
                 {
                     battleState = BattleState.animatingEnemy;
-                    if (appliedConditionThisTurn && playerPokemonObject.status != "normal")
-                    {
-                        processMoveSelection(moveToUse.name, null);
-                    }
-                    else battleMenuDepth = BattleMenuDepth.initial;
                 }
 
                 //PLAYER CONDITIONS DUPLICATE FOR ENEMY 
                 else if (battleState == BattleState.playerConditions)
                 {
                     battleAnimationStarted = false;
-                if (playerPokemonObject.status == "poison")
-                {
-                    selectedEnemyMove = pokemon.poisonDamage;
-                    battleState = BattleState.animatingEnemy;
+                    if (playerPokemonObject.status == "poison")
+                    {
+                        selectedEnemyMove = pokemon.poisonDamage;
+                    }
+                    else if (playerPokemonObject.status == "paralyze")
+                    {
+                        if (paralyzeSkip) selectedEnemyMove = pokemon.paralyzeDamage;
+                        else selectedEnemyMove = pokemon.blank;
+                    }
+                    else if (playerPokemonObject.status == "sleep")
+                    {
+                        if (!paralyzeSkip)
+                        {
+                            playerPokemonObject.status = "normal";
+                            selectedEnemyMove = pokemon.blank;
+                        }
+                        else selectedEnemyMove = pokemon.sleepDamage;
+                    }
+                    else if (playerPokemonObject.status == "confuse")
+                    {
+                        if (!paralyzeSkip)
+                        {
+                            selectedEnemyMove = pokemon.blank;
+                            if (cureCondition) playerPokemonObject.status = "normal";
+                        }
+                        else selectedEnemyMove = pokemon.confusionDamage;
+                    }
+                    else if (playerPokemonObject.status == "frozen")
+                    {
+                        selectedEnemyMove = pokemon.frozenDamage;
+                    }
+                    else if (playerPokemonObject.status == "burn")
+                    {
+                        selectedEnemyMove = pokemon.burnDamage;
+                        if (cureCondition)
+                        {
+                            playerPokemonObject.status = "normal";
+                            selectedEnemyMove = pokemon.blank;
+                        
+                        }
+                    }
+                battleState = BattleState.animatingEnemy;
+                result = "";
                 }
-                else if (playerPokemonObject.status == "paralyze")
+
+            //ENEMY CONDITIONS
+            else if (battleState == BattleState.enemyConditions)
+            {
+                battleAnimationStarted = false;
+                if (enemyPokemonObject.status == "poison")
                 {
-                    if (paralyzeSkip) selectedEnemyMove = pokemon.paralyzeDamage;
-                    else selectedEnemyMove = pokemon.blank;
-                    battleState = BattleState.animatingEnemy;
+                    moveToUse = pokemon.poisonDamage;
                 }
-                else if (playerPokemonObject.status == "sleep")
+                else if (enemyPokemonObject.status == "paralyze")
+                {
+                    if (paralyzeSkip) moveToUse = pokemon.paralyzeDamage;
+                    else moveToUse = pokemon.blank;
+                }
+                else if (enemyPokemonObject.status == "sleep")
                 {
                     if (!paralyzeSkip)
                     {
-                        playerPokemonObject.status = "normal";
-                        selectedEnemyMove = pokemon.blank;
+                        enemyPokemonObject.status = "normal";
+                        moveToUse = pokemon.blank;
                     }
-                    else selectedEnemyMove = pokemon.sleepDamage;
-                    battleState = BattleState.animatingEnemy;
+                    else moveToUse = pokemon.sleepDamage;
                 }
-                else if (playerPokemonObject.status == "confuse")
+                else if (enemyPokemonObject.status == "confuse")
                 {
                     if (!paralyzeSkip)
                     {
-                        selectedEnemyMove = pokemon.blank;
-                        if (cureCondition) playerPokemonObject.status = "normal";
+                        moveToUse = pokemon.blank;
+                        if (cureCondition) enemyPokemonObject.status = "normal";
                     }
-                    else selectedEnemyMove = pokemon.confusionDamage;
-                    battleState = BattleState.animatingEnemy;
+                    else moveToUse = pokemon.confusionDamage;
                 }
-                else if (playerPokemonObject.status == "frozen")
+                else if (enemyPokemonObject.status == "frozen")
                 {
-                    selectedEnemyMove = pokemon.frozenDamage;
-                    battleState = BattleState.animatingEnemy;
+                    moveToUse = pokemon.frozenDamage;
                 }
-                else if (playerPokemonObject.status == "burn")
+                else if (enemyPokemonObject.status == "burn")
                 {
-                    selectedEnemyMove = pokemon.burnDamage;
+                    moveToUse = pokemon.burnDamage;
                     if (cureCondition)
                     {
-                        playerPokemonObject.status = "normal";
-                        selectedEnemyMove = pokemon.blank;
-                        
+                        enemyPokemonObject.status = "normal";
+                        moveToUse = pokemon.blank;
                     }
-                    battleState = BattleState.animatingEnemy;
                 }
-                    result = "";
-                }
+                battleState = BattleState.animatingPlayer;
+                result = "";
+            }
         }
 
         //Draw conditions
@@ -1884,21 +2210,20 @@ namespace Phoenix
         //player pokemon animations
         public void animatePlayer(string move, GameTime gameTime)
         {
-            
             switch (move)
             {
                 case "Tackle":
-                    if (animationCycle < 10 && DateTime.Now.Ticks > animationTime + animationDelay && !reverseAnimation)
+                    if (animationCycle < 10 && DateTime.Now.Ticks > animationTime + animationDelay * (BATTLESPEED / 2) && !reverseAnimation)
                     {
                         playerPokemonRect.X += 2;
                         playerPokemonRect.Y -= 2;
                         animationCycle++;
                         animationTime = DateTime.Now.Ticks;
                     }
-                    else if (animationCycle > 0 && DateTime.Now.Ticks > animationTime + animationDelay && reverseAnimation)
+                    else if (animationCycle > 0 && DateTime.Now.Ticks > animationTime + animationDelay * (BATTLESPEED / 2) && reverseAnimation)
                     {
-                        if (enemyPokemon.Name == "sprites/pokemon/front" + shinyString + "/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix) enemyPokemon = Content.Load<Texture2D>("sprites/pokemon/front_inv/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix);
-                        else enemyPokemon = Content.Load<Texture2D>("sprites/pokemon/front" + shinyString + "/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix);
+                        if (enemyPokemon.Name == "sprites/pokemon/front" + femaleString + "" + shinyString + "/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix) enemyPokemon = Content.Load<Texture2D>("sprites/pokemon/front" + femaleString + "_inv/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix);
+                        else enemyPokemon = Content.Load<Texture2D>("sprites/pokemon/front" + femaleString + "" + shinyString + "/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix);
                         playerPokemonRect.X -= 2;
                         playerPokemonRect.Y += 2;
                         animationCycle--;
@@ -1912,7 +2237,9 @@ namespace Phoenix
                     {
                         playerAnimationComplete = true;
                         battleState = BattleState.enemyTurn;
+                        refreshHP(true);
                     }
+                    
                     break;
                 default:
                     battleAnimation(moveToUse.path, true);
@@ -1923,21 +2250,20 @@ namespace Phoenix
         //enemy pokemon animations
         public void animateEnemy(string move, GameTime gameTime)
         {
-
             switch (move)
             {
                 case "Tackle":
-                    if (animationCycle < 10 && DateTime.Now.Ticks > animationTime + animationDelay && !reverseAnimation)
+                    if (animationCycle < 10 && DateTime.Now.Ticks > animationTime + animationDelay * (BATTLESPEED / 2) && !reverseAnimation)
                     {
                         enemyPokemonRect.X -= 2;
                         enemyPokemonRect.Y += 2;
                         animationCycle++;
                         animationTime = DateTime.Now.Ticks;
                     }
-                    else if (animationCycle > 0 && DateTime.Now.Ticks > animationTime + animationDelay && reverseAnimation)
+                    else if (animationCycle > 0 && DateTime.Now.Ticks > animationTime + animationDelay * (BATTLESPEED / 2) && reverseAnimation)
                     {
-                        if (playerPokemon.Name == "sprites/pokemon/back" + shinyString + "/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix) playerPokemon = Content.Load<Texture2D>("sprites/pokemon/back_inv/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix);
-                        else playerPokemon = Content.Load<Texture2D>("sprites/pokemon/back" + shinyString + "/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix);
+                        if (playerPokemon.Name == "sprites/pokemon/back" + playerFemaleString + "" + playerShinyString + "/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix) playerPokemon = Content.Load<Texture2D>("sprites/pokemon/back" + playerFemaleString + "" + "_inv/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix);
+                        else playerPokemon = Content.Load<Texture2D>("sprites/pokemon/back" + playerFemaleString + "" + playerShinyString + "/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix);
                         enemyPokemonRect.X += 2;
                         enemyPokemonRect.Y -= 2;
                         animationCycle--;
@@ -1951,7 +2277,10 @@ namespace Phoenix
                     {
                         enemyAnimationComplete = true;
                         battleState = BattleState.playerTurn;
+                        battleMenuDepth = BattleMenuDepth.initial;
+                        refreshHP(true);
                     }
+                    
                     break;
                 default:
                     battleAnimation(selectedEnemyMove.path, false);
@@ -1990,15 +2319,15 @@ namespace Phoenix
                 }
                 if (battleAnimationFinisher && finishFrames > 0)
                 {
-                    if (onEnemy && move != "blank" && move != "sleep" && move != "frozen")
+                    if (onEnemy && move != "blank" && move != "sleep" && move != "frozen" && move != "paralyze")
                     {
-                        if (enemyPokemon.Name == "sprites/pokemon/front" + shinyString + "/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix) enemyPokemon = Content.Load<Texture2D>("sprites/pokemon/front_inv/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix);
-                        else enemyPokemon = Content.Load<Texture2D>("sprites/pokemon/front" + shinyString + "/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix);
+                        if (enemyPokemon.Name == "sprites/pokemon/front" + femaleString + "" + shinyString + "/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix) enemyPokemon = Content.Load<Texture2D>("sprites/pokemon/front" + femaleString + "_inv/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix);
+                        else enemyPokemon = Content.Load<Texture2D>("sprites/pokemon/front" + femaleString + "" + shinyString + "/" + enemyPokemonObject.pokedex + "" + enemyPokemonObject.pokedexSuffix);
                     }
-                    else if (move != "blank" && move != "sleep" && move != "frozen")
+                    else if (move != "blank" && move != "sleep" && move != "frozen" && move != "paralyze")
                     {
-                        if (playerPokemon.Name == "sprites/pokemon/back" + shinyString + "/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix) playerPokemon = Content.Load<Texture2D>("sprites/pokemon/back_inv/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix);
-                        else playerPokemon = Content.Load<Texture2D>("sprites/pokemon/back" + shinyString + "/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix);
+                        if (playerPokemon.Name == "sprites/pokemon/back" + playerFemaleString + "" + playerShinyString + "/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix) playerPokemon = Content.Load<Texture2D>("sprites/pokemon/back" + playerFemaleString + "" + "_inv/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix);
+                        else playerPokemon = Content.Load<Texture2D>("sprites/pokemon/back" + playerFemaleString + "" + playerShinyString + "/" + playerPokemonObject.pokedex + "" + playerPokemonObject.pokedexSuffix);
                     }
                     else finishFrames = 0;
                     finishFrames--;
@@ -2007,9 +2336,23 @@ namespace Phoenix
                 {
                     if (onEnemy)
                     {
+                        Console.WriteLine("On Enemy");
                         enemyAnimationComplete = true;
                         battleAnimationStarted = false;
                         battleState = BattleState.enemyTurn;
+                        if (previousBattleState == BattleState.enemyConditions)
+                        {
+                            if (!paralyzeSkip)
+                            {
+                                battleState = BattleState.enemyTurn;
+                                processEnemyMoves();
+                            }
+                            else
+                            {
+                                //paralyzeSkip = false;
+                                battleState = BattleState.playerTurn;
+                            }
+                        }
                     }
                     else
                     {
@@ -2030,11 +2373,13 @@ namespace Phoenix
                             }
                         }
                     }
-                    refreshHP();
+                    if (battleState == BattleState.playerTurn) battleMenuDepth = BattleMenuDepth.initial;
+                    Console.WriteLine("Animation Complete");
                     battleAnimationFinisher = false;
                     battleAnimationX = 0;
                     battleAnimationY = 0;
                     finishFrames = 6;
+                    refreshHP(true);
                 }
                 previousGameTime = DateTime.Now.Ticks;
             }

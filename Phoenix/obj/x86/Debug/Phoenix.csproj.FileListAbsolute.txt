@@ -7053,3 +7053,12 @@ C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprite
 C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\battle\animations\burn.xnb
 C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\audio\bgm\title.wma
 C:\Users\Aaron\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\audio\bgm\title.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\audio\bgm\title.wma
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\audio\bgm\title.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\battle\animations\burn.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\battle\components\female.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\battle\components\male.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\pokemon\back_female_inv\19.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\pokemon\back_female_inv\25.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\pokemon\front_female_inv\19.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\pokemon\front_female_inv\25.xnb
