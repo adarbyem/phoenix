@@ -11,9 +11,20 @@ namespace Phoenix
     {
         //Create RNG for Shiny
         Random rng = new Random();
+        
         pokemon newPokemon;
         int shinyChance = 3000;//Higher = more rare default 3000
         int femaleChance = 40;//Default 40
+        //Condition moves (Not to be assigned)
+        public moves poisonDamage;
+        public moves paralyzeDamage;
+        public moves blank;
+        public moves sleepDamage;
+        public moves confusionDamage;
+        public moves frozenDamage;
+        public moves burnDamage;
+        
+
         //Create moves
         int difficulty;
         public moves NONE;
@@ -28,13 +39,14 @@ namespace Phoenix
         public moves sleepPowder;
         public moves poisonPowder;
         public moves stunPowder;
-        public moves poisonDamage;
-        public moves paralyzeDamage;
-        public moves blank;
-        public moves sleepDamage;
-        public moves confusionDamage;
-        public moves frozenDamage;
-        public moves burnDamage;
+        public moves vineWhip;
+        public moves bubble;
+        public moves bite;
+        public moves ember;
+        public moves smokeScreen;
+        public moves thunderWave;
+        public moves peck;
+        public moves thunderShock;
 
         public struct moves
         {
@@ -88,6 +100,10 @@ namespace Phoenix
             public bool isFemale;
             public bool hasFemaleSprite;
             public int totalAffinity;
+            public int currentMoveIndex;
+            public string type1;
+            public string type2;
+            public int startAffinity;
 
             public void setStats(string _name, int _MaxHP, moves _move1, moves _move2, moves _move3, moves _move4, bool _isShiny, int _dex, string _dexSuffix, int _pp1, int _pp2, int _pp3, int _pp4, bool _isFemale, bool _hasSprite)
             {
@@ -114,9 +130,10 @@ namespace Phoenix
                 isFemale = _isFemale;
                 hasFemaleSprite = _hasSprite;
                 totalAffinity = 0;
+                currentMoveIndex = 0;
             }
 
-            public void setAttrib(int _atk, int _def, int _satk, int _sdef, int _evade, int _spd, string _status)
+            public void setAttrib(int _atk, int _def, int _satk, int _sdef, int _evade, int _spd, string _status, string _type1, string _type2)
             {
                 atk = _atk;
                 def = _def;
@@ -125,6 +142,8 @@ namespace Phoenix
                 evade = _evade;
                 spd = _spd;
                 status = _status;
+                type1 = _type1;
+                type2 = _type2;
             }
 
             public void train(int stat)
@@ -251,26 +270,26 @@ namespace Phoenix
             burnDamage.setMoves("burn", "burn", "Normal", 0, 0, 0);
 
             //Assignable Moves
-            tackle.setMoves("Tackle", "", "Normal", 1, 1, 35);
-            tailWhip.setMoves("Tail Whip","tail_whip", "Normal", 0, 4, 30);
-            gust.setMoves("Gust", "gust", "Flying", 1, 1, 30);
-            sandAttack.setMoves("Sand Attack", "sand_attack", "Normal", 0, 18, 30);
-            growl.setMoves("Growl", "growl", "Normal", 1, 8, 30);
-            scratch.setMoves("Scratch", "scratch", "Normal", 1, 1, 35);
+            tackle.setMoves("Tackle", "", "Normal", 2, 1, 35);
+            tailWhip.setMoves("Tail Whip","tail_whip", "Normal", 5, 3, 30);
+            gust.setMoves("Gust", "gust", "Flying", 2, 1, 35);
+            sandAttack.setMoves("Sand Attack", "sand_attack", "Normal", 30, 19, 30);
+            growl.setMoves("Growl", "growl", "Normal", 5, 8, 30);
+            scratch.setMoves("Scratch", "scratch", "Normal", 2, 1, 35);
             highJumpKick.setMoves("High Jump Kick", "high_jump_kick", "Fighting", 1, 1, 15);
-            leer.setMoves("Leer", "leer", "Normal", 0, 3, 30);
+            leer.setMoves("Leer", "leer", "Normal", 5, 3, 30);
             stunPowder.setMoves("Stun Powder", "stun_powder", "Grass", 0, 13, 20);
             sleepPowder.setMoves("Sleep Powder", "sleep_powder", "Grass", 0, 11, 20);
             poisonPowder.setMoves("Poison Powder", "poison_powder", "Poison", 0, 15, 20);
+            thunderShock.setMoves("Thunder Shock", "thunder_shock", "Electric", 4, 2, 30);
+            vineWhip.setMoves("Vine Whip", "vine_whip", "Grass", 4, 1, 30);
+            bubble.setMoves("Bubble", "bubble", "Water", 4, 2, 30);
+            ember.setMoves("Ember", "ember", "Fire", 4, 2, 30);
+            smokeScreen.setMoves("Smokescreen", "smoke_screen", "Fire", 30, 19, 30);
+            bite.setMoves("Bite", "bite", "Dark", 4, 1, 30);
+            thunderWave.setMoves("Thunder Wave", "thunder_wave", "Electric", 0, 13, 30);
+            peck.setMoves("Peck", "peck", "Flying", 4, 1, 30);
         }
-        //Affinity
-        //0 = Normal
-        //1 = Flying
-        //2 = Fighting
-        //3 = Grass
-        //4 = Poison
-        //5 = Fire
-            
 
         //Get pokemon for the current Map
         public int[][] getPokemonID(string mapID)
@@ -309,40 +328,41 @@ namespace Phoenix
             if (rng.Next(0, 110) + 1 < femaleChance) isFemale = true;
             else isFemale = false;
             
+            //Default base stats = 50, 50, 50, 50, 50, 50
             newPokemon = new pokemon();
             switch (id)
             {
                 case "1":
                     newPokemon.setStats("Bulbasaur", 10, tackle, leer, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, growl.PP, NONE.PP, NONE.PP, isFemale, false);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal");
+                    newPokemon.setAttrib(50, 50, 50, 50, 50, 50, "normal", "grass", "blank");
                     break;
                 case "4":
                     newPokemon.setStats("Charmander", 10, scratch, growl, NONE, NONE, isShiny, int.Parse(id), "", scratch.PP, growl.PP, NONE.PP, NONE.PP, isFemale, false);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal");
+                    newPokemon.setAttrib(50, 50, 50, 50, 50, 50, "normal", "fire", "blank");
                     break;
                 case "7":
                     newPokemon.setStats("Squritle", 10, tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP, isFemale, false);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal");
+                    newPokemon.setAttrib(50, 50, 50, 50, 50, 50, "normal", "water", "blank");
                     break;
                 case "16":
                     newPokemon.setStats("Pidgey", 10, gust, sandAttack, NONE, NONE, isShiny, int.Parse(id), "", gust.PP, sandAttack.PP, NONE.PP, NONE.PP, isFemale, false);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal");
+                    newPokemon.setAttrib(50, 50, 50, 50, 50, 50, "normal", "flying", "blank");
                     break;
                 case "19":
                     newPokemon.setStats("Rattata", 10, tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP, isFemale, true);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal");
+                    newPokemon.setAttrib(50, 50, 50, 50, 50, 50, "normal", "normal", "blank");
                     break;
                 case "25":
                     newPokemon.setStats("Pikachu", 10, tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP, isFemale, true);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal");
+                    newPokemon.setAttrib(50, 50, 50, 50, 50, 50, "normal", "electric", "blank");
                     break;
                 case "69":
-                    newPokemon.setStats("Bellsprout", 10, sleepPowder, tackle, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP, isFemale, false);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal");
+                    newPokemon.setStats("Bellsprout", 10, vineWhip, NONE, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP, isFemale, false);
+                    newPokemon.setAttrib(50, 50, 50, 50, 50, 50, "normal", "grass", "blank");
                     break;
                 default:
                     newPokemon.setStats("MissingNo", 10, NONE, NONE, NONE, NONE, false, 0, "", tackle.PP, growl.PP, NONE.PP, NONE.PP, isFemale, false);
-                    newPokemon.setAttrib(5, 5, 5, 5, 5, 5, "normal");
+                    newPokemon.setAttrib(50, 50, 50, 50, 50, 50, "normal", "blank", "blank");
                     break;
             }
             //Default affinities to 5000
@@ -351,15 +371,31 @@ namespace Phoenix
                 newPokemon.attackAffinity[x] = 5000;
                 newPokemon.defenseAffinity[x] = 5000;
             }
-            //Function to adjust affinity based on type
             //Function to adjust affinity based on location
+            adjustAffinityByType();//Function to adjust the affinities based on pokemon type
             adjustDifficulty();//Function to adjust base states based on difficulty
             return newPokemon;
         }
 
+        //Adjust difficulty based on map difficulty
         public void adjustDifficulty()
         {
-            for(int x = 0; x < difficulty; x++)
+            LevelUp levelUp = new LevelUp();
+            int sum = 0;
+            for (int x = 0; x < difficulty * 20; x++)
+            {
+                newPokemon.attackAffinity[rng.Next(0, 17) + 1]++;
+                newPokemon.defenseAffinity[rng.Next(0, 17) + 1]++;
+            }
+            foreach(int x in newPokemon.attackAffinity)
+            {
+                sum += x;
+            }
+            foreach(int x in newPokemon.defenseAffinity)
+            {
+                sum += x;
+            }
+            for (int x = 0; x < difficulty; x++)
             {
                 switch(rng.Next(0, 7) + 1)
                 {
@@ -389,7 +425,220 @@ namespace Phoenix
                         Console.WriteLine("WTF stat are you trying to improve?");
                         break;
                 }
+                moves moveToLearn = levelUp.moveCheck(newPokemon.startAffinity - sum, newPokemon.pokedex, newPokemon.currentMoveIndex);
+                if (moveToLearn.name != "blank")
+                {
+                    if (newPokemon.move3.name != "NONE")
+                    {
+                        if (newPokemon.move4.name != "NONE")
+                        {
+                            newPokemon.move1 = newPokemon.move2;
+                            newPokemon.move2 = newPokemon.move3;
+                            newPokemon.move3 = newPokemon.move4;
+                            newPokemon.move4 = moveToLearn;
+                        }
+                        else newPokemon.move4 = moveToLearn;
+                    }
+                    else newPokemon.move3 = moveToLearn;
+                    newPokemon.currentMoveIndex++;
+                }
+            }
+
+        }
+
+        //Adjust affinity based on type
+        public void adjustAffinityByType()
+        {
+            string type;
+            for(int x = 0; x < 2; x++)
+            {
+                if (x == 0) type = newPokemon.type1;
+                else type = newPokemon.type2;
+                switch (type)
+                {
+                    case ("normal"):
+                        newPokemon.defenseAffinity[2] -= 2500;
+                        newPokemon.defenseAffinity[11] += 2500;
+                        break;
+                    case ("flying"):
+                        newPokemon.defenseAffinity[8] += 2500;
+                        newPokemon.defenseAffinity[2] += 2500;
+                        newPokemon.defenseAffinity[3] += 2500;
+                        newPokemon.defenseAffinity[6] -= 2500;
+                        newPokemon.defenseAffinity[7] -= 2500;
+                        newPokemon.defenseAffinity[12] -= 2500;
+                        break;
+                    case ("fighting"):
+                        newPokemon.defenseAffinity[8] += 2500;
+                        newPokemon.defenseAffinity[13] += 2500;
+                        newPokemon.defenseAffinity[12] += 2500;
+                        newPokemon.defenseAffinity[1] -= 2500;
+                        newPokemon.defenseAffinity[14] -= 2500;
+                        newPokemon.defenseAffinity[15] -= 2500;
+                        break;
+                    case ("grass"):
+                        newPokemon.defenseAffinity[3] += 2500;
+                        newPokemon.defenseAffinity[6] += 2500;
+                        newPokemon.defenseAffinity[9] += 2500;
+                        newPokemon.defenseAffinity[10] += 2500;
+                        newPokemon.defenseAffinity[5] -= 2500;
+                        newPokemon.defenseAffinity[7] -= 2500;
+                        newPokemon.defenseAffinity[1] -= 2500;
+                        newPokemon.defenseAffinity[8] -= 2500;
+                        newPokemon.defenseAffinity[4] -= 2500;
+                        break;
+                    case ("poison"):
+                        newPokemon.defenseAffinity[2] += 2500;
+                        newPokemon.defenseAffinity[4] += 2500;
+                        newPokemon.defenseAffinity[3] += 2500;
+                        newPokemon.defenseAffinity[10] -= 2500;
+                        newPokemon.defenseAffinity[8] -= 2500;
+                        newPokemon.defenseAffinity[14] -= 2500;
+                        break;
+                    case ("fire"):
+                        newPokemon.defenseAffinity[5] += 2500;
+                        newPokemon.defenseAffinity[8] += 2500;
+                        newPokemon.defenseAffinity[3] += 2500;
+                        newPokemon.defenseAffinity[7] += 2500;
+                        newPokemon.defenseAffinity[16] += 2500;
+                        newPokemon.defenseAffinity[9] -= 2500;
+                        newPokemon.defenseAffinity[10] -= 2500;
+                        newPokemon.defenseAffinity[12] -= 2500;
+                        break;
+                    case ("electric"):
+                        newPokemon.defenseAffinity[6] += 2500;
+                        newPokemon.defenseAffinity[1] += 2500;
+                        newPokemon.defenseAffinity[16] += 2500;
+                        newPokemon.defenseAffinity[10] -= 2500;
+                        break;
+                    case ("ice"):
+                        newPokemon.defenseAffinity[7] += 2500;
+                        newPokemon.defenseAffinity[2] -= 2500;
+                        newPokemon.defenseAffinity[5] -= 2500;
+                        newPokemon.defenseAffinity[12] -= 2500;
+                        newPokemon.defenseAffinity[16] -= 2500;
+                        break;
+                    case ("bug"):
+                        newPokemon.defenseAffinity[2] += 2500;
+                        newPokemon.defenseAffinity[3] += 2500;
+                        newPokemon.defenseAffinity[10] += 2500;
+                        newPokemon.defenseAffinity[5] -= 2500;
+                        newPokemon.defenseAffinity[1] -= 2500;
+                        newPokemon.defenseAffinity[12] -= 2500;
+                        break;
+                    case ("water"):
+                        newPokemon.defenseAffinity[5] += 2500;
+                        newPokemon.defenseAffinity[7] += 2500;
+                        newPokemon.defenseAffinity[16] += 2500;
+                        newPokemon.defenseAffinity[9] += 2500;
+                        newPokemon.defenseAffinity[6] -= 2500;
+                        newPokemon.defenseAffinity[3] -= 2500;
+                        break;
+                    case ("ground"):
+                        newPokemon.defenseAffinity[4] += 2500;
+                        newPokemon.defenseAffinity[12] += 2500;
+                        newPokemon.defenseAffinity[10] += 2500;
+                        newPokemon.defenseAffinity[3] -= 2500;
+                        newPokemon.defenseAffinity[7] -= 2500;
+                        newPokemon.defenseAffinity[9] -= 2500;
+                        break;
+                    case ("ghost"):
+                        newPokemon.defenseAffinity[0] += 2500;
+                        newPokemon.defenseAffinity[2] += 2500;
+                        newPokemon.defenseAffinity[8] += 2500;
+                        newPokemon.defenseAffinity[4] += 2500;
+                        newPokemon.defenseAffinity[13] -= 2500;
+                        newPokemon.defenseAffinity[11] -= 2500;
+                        break;
+                    case ("rock"):
+                        newPokemon.defenseAffinity[5] += 2500;
+                        newPokemon.defenseAffinity[1] += 2500;
+                        newPokemon.defenseAffinity[0] += 2500;
+                        newPokemon.defenseAffinity[4] += 2500;
+                        newPokemon.defenseAffinity[2] -= 2500;
+                        newPokemon.defenseAffinity[3] -= 2500;
+                        newPokemon.defenseAffinity[10] -= 2500;
+                        newPokemon.defenseAffinity[16] -= 2500;
+                        newPokemon.defenseAffinity[9] -= 2500;
+                        break;
+                    case ("dark"):
+                        newPokemon.defenseAffinity[14] += 2500;
+                        newPokemon.defenseAffinity[13] += 2500;
+                        newPokemon.defenseAffinity[11] += 2500;
+                        newPokemon.defenseAffinity[8] -= 2500;
+                        newPokemon.defenseAffinity[15] -= 2500;
+                        newPokemon.defenseAffinity[2] -= 2500;
+                        break;
+                    case ("psychic"):
+                        newPokemon.defenseAffinity[14] += 2500;
+                        newPokemon.defenseAffinity[13] += 2500;
+                        newPokemon.defenseAffinity[8] -= 2500;
+                        newPokemon.defenseAffinity[15] -= 2500;
+                        newPokemon.defenseAffinity[2] -= 2500;
+                        break;
+                    case ("fairy"):
+                        newPokemon.defenseAffinity[8] += 2500;
+                        newPokemon.defenseAffinity[2] += 2500;
+                        newPokemon.defenseAffinity[14] += 2500;
+                        newPokemon.defenseAffinity[17] += 2500;
+                        newPokemon.defenseAffinity[4] -= 2500;
+                        newPokemon.defenseAffinity[16] -= 2500;
+                        break;
+                    case ("steel"):
+                        newPokemon.defenseAffinity[8] += 2500;
+                        newPokemon.defenseAffinity[17] += 2500;
+                        newPokemon.defenseAffinity[15] += 2500;
+                        newPokemon.defenseAffinity[1] += 2500;
+                        newPokemon.defenseAffinity[3] += 2500;
+                        newPokemon.defenseAffinity[7] += 2500;
+                        newPokemon.defenseAffinity[0] += 2500;
+                        newPokemon.defenseAffinity[14] += 2500;
+                        newPokemon.defenseAffinity[12] += 2500;
+                        newPokemon.defenseAffinity[16] += 2500;
+                        newPokemon.defenseAffinity[4] += 2500;
+                        newPokemon.defenseAffinity[2] -= 2500;
+                        newPokemon.defenseAffinity[5] -= 2500;
+                        newPokemon.defenseAffinity[10] -= 2500;
+                        break;
+                    case ("dragon"):
+                        newPokemon.defenseAffinity[6] += 2500;
+                        newPokemon.defenseAffinity[5] += 2500;
+                        newPokemon.defenseAffinity[3] += 2500;
+                        newPokemon.defenseAffinity[9] += 2500;
+                        newPokemon.defenseAffinity[17] -= 2500;
+                        newPokemon.defenseAffinity[15] -= 2500;
+                        newPokemon.defenseAffinity[7] -= 2500;
+                        break;
+                }
+            }
+            foreach(int x in newPokemon.attackAffinity)
+            {
+                newPokemon.startAffinity += x;
+            }
+            foreach(int x in newPokemon.defenseAffinity)
+            {
+                newPokemon.startAffinity += x;
             }
         }
+        /*
+                    "Normal": 0
+                    "Flying": 1
+                    "Fighting": 2
+                    "Grass": 3
+                    "Poison": 4
+                    "Fire": 5
+                    "Electric": 6
+                    "Ice": 7
+                    "Bug": 8
+                    "Water": 9
+                    "Ground": 10
+                    "Ghost": 11
+                    "Rock": 12
+                    "Dark": 13
+                    "Psychic": 14
+                    "Fairy: 15
+                    "Steel": 16
+                    "Dragon: 17
+                   */
     }
 }

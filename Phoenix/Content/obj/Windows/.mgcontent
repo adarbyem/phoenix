@@ -3497,5 +3497,13 @@
     <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/pokemon/back_female_inv/25.png</File>
     <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/pokemon/front_female_inv/19.png</File>
     <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/sprites/pokemon/front_female_inv/25.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/thunder_shock.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/bite.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/bubble.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/ember.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/peck.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/smoke_screen.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/thunder_wave.png</File>
+    <File>C:/Users/adarby/Source/Repos/Phoenix/Phoenix/Content/battle/animations/vine_whip.png</File>
   </SourceFiles>
 </SourceFileCollection>

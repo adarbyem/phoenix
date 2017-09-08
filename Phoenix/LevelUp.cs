@@ -9,6 +9,10 @@ namespace Phoenix
     class LevelUp
     {
         Random rng = new Random();
+        Pokemon pokemon = new Pokemon();
+        
+
+        //Determine what stat to increase
         public string levelUp()
         {
             switch(rng.Next(0, 7) + 1)
@@ -31,27 +35,42 @@ namespace Phoenix
                     return "???";
             }
         }
+
+        public Pokemon.moves moveCheck(int affinityLevel, int dex, int index)
+        {
+            pokemon.InitializeMoves();
+            switch (dex)
+            {
+                case 1:
+                    if (affinityLevel > 60 && index < 1) return pokemon.vineWhip;
+                    else if (affinityLevel > 100 && index < 2) return pokemon.poisonPowder;
+                    break;
+                case 4:
+                    if (affinityLevel > 60 && index < 1) return pokemon.ember;
+                    else if (affinityLevel > 100 && index < 2) return pokemon.smokeScreen;
+                    break;
+                case 7:
+                    if (affinityLevel > 60 && index < 1) return pokemon.bubble;
+                    else if (affinityLevel > 100 && index < 2) return pokemon.bite;
+                    break;
+                case 16:
+                    if (affinityLevel > 60 && index < 1) return pokemon.leer;
+                    else if (affinityLevel > 100 && index < 2) return pokemon.peck;
+                    break;
+                case 19:
+                    if (affinityLevel > 60 && index < 1) return pokemon.bite;
+                    else if (affinityLevel > 100 && index < 2) return pokemon.growl;
+                    break;
+                case 25:
+                    if(affinityLevel > 60 && index < 1) return pokemon.thunderShock;
+                    else if (affinityLevel > 100 && index < 2) return pokemon.thunderWave;
+                    break;
+                case 69:
+                    if (affinityLevel > 60 && index < 1) return pokemon.stunPowder;
+                    else if (affinityLevel > 100 && index < 2) return pokemon.poisonPowder;
+                    break;
+            }
+            return pokemon.blank;
+        }
     }
 }
-/*
-case 1:
-    atk++;
-    break;
-case 2:
-    satk++;
-    break;
-case 3:
-    def++;
-    break;
-case 4:
-    sdef++;
-    break;
-case 5:
-    evade++;
-    break;
-case 6:
-    spd++;
-    break;
-case 7:
-    MaxHP++;
-*/

@@ -7062,3 +7062,11 @@ C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprit
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\pokemon\back_female_inv\25.xnb
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\pokemon\front_female_inv\19.xnb
 C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\sprites\pokemon\front_female_inv\25.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\battle\animations\thunder_shock.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\battle\animations\bite.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\battle\animations\bubble.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\battle\animations\ember.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\battle\animations\peck.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\battle\animations\smoke_screen.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\battle\animations\thunder_wave.xnb
+C:\Users\adarby\Source\Repos\Phoenix\Phoenix\bin\Windows\x86\Debug\Content\battle\animations\vine_whip.xnb
