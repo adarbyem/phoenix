@@ -84,6 +84,11 @@ namespace Phoenix
         Texture2D playerPokemonGender;
         Rectangle enemyPokemonGenderRect;
         Rectangle playerPokemonGenderRect;
+        Pokemon.moves moveToLearn;
+        Texture2D yesNoMenu;
+        Rectangle yesNoMenuRect;
+        Texture2D yesNoMenuSelector;
+        Rectangle yesNoMenuSelectorRect;
         string selectedMove;
         double netDamage;
         int type;
@@ -117,6 +122,8 @@ namespace Phoenix
         int[] playerStatMod = new int[7];
         string additionalStatString = "";
         int tempPlayerPokemonHP = 0;
+        string replacedMove = "";
+        bool faintConfirmed = false;
 
         //Pokemon Globals
         Pokemon pokemon;
@@ -152,6 +159,11 @@ namespace Phoenix
         Rectangle DialogueRectangle;
         SpriteFont font;
         SpriteFont font6;
+        Vector2 line1;
+        Vector2 line2;
+        Vector2 line3;
+        Vector2 line4;
+        Vector2 line5;
         int dialogueX;
         int dialogueY;
         int dialogueWidth;
@@ -247,7 +259,8 @@ namespace Phoenix
             animatingPlayer,
             animatingEnemy,
             enemyFaint,
-            playerFaint
+            playerFaint,
+            learningMove
         }
         BattleState battleState;
         BattleState previousBattleState;
@@ -262,6 +275,18 @@ namespace Phoenix
             waiting,
         }
         BattleMenuDepth battleMenuDepth;
+
+        enum LearnMoveState
+        {
+            stage0,//Initial
+            stage1,//Yes
+            stage2,//No
+            stage3,//Choose
+            stage4,//Confirm No
+            stage5,//Result Yes
+            stage6//Result No
+        }
+        LearnMoveState learnMoveState;
 
         public Game()
         {
@@ -315,6 +340,12 @@ namespace Phoenix
             move2pos = new Vector2(415, 330);
             move3pos = new Vector2(225, 375);
             move4pos = new Vector2(415, 375);
+            
+            yesNoMenu = Content.Load<Texture2D>("menu/yesno");
+            yesNoMenuRect = new Rectangle(603, 274, 98, 100);
+            yesNoMenuSelector = Content.Load<Texture2D>("menu/yesnoselector");
+            yesNoMenuSelectorRect = new Rectangle(619, 289, 72, 28);
+
             enemyNamePos = new Vector2(208, 78);
             playerNamePos = new Vector2(460, 233);
             playerHPNumbers = new Vector2(469, 272);
@@ -373,6 +404,11 @@ namespace Phoenix
             dialogueWidth = 600;
             dialogueX = 100;//100
             dialogueY = 375;//500
+            line1 = new Vector2(dialogueX + 15, dialogueY + 9);
+            line2 = new Vector2(dialogueX + 15, dialogueY + 25);
+            line3 = new Vector2(dialogueX + 15, dialogueY + 41);
+            line4 = new Vector2(dialogueX + 15, dialogueY + 57);
+            line5 = new Vector2(dialogueX + 15, dialogueY + 73);
             DialogueRectangle = new Rectangle(dialogueX, dialogueY, dialogueWidth, dialogueHeight);
             //Load Splash
             SplashScreen = Content.Load<Texture2D>("splash/splash");
@@ -681,7 +717,12 @@ namespace Phoenix
                 if (battleMenuSelection == "fight") battleMenuSelection = "pokemon";
                 else battleMenuSelection = "run";
             }
-            if(battleState == BattleState.enemyFaint && currentKeyboardState.IsKeyDown(Keys.E) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay && enemyPokemonRect.Height <= 0)
+            if (battleState == BattleState.enemyFaint && currentKeyboardState.IsKeyDown(Keys.E) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay && enemyPokemonRect.Height <= 0 && !faintConfirmed)
+            {
+                faintConfirmed = true;
+                previousGameTime = DateTime.Now.Ticks;
+            }
+            if (battleState == BattleState.enemyFaint && currentKeyboardState.IsKeyDown(Keys.E) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay && enemyPokemonRect.Height <= 0 && faintConfirmed)
             {
                 //Trigger logic for trainer battles here
 
@@ -700,7 +741,12 @@ namespace Phoenix
                 didLevelUp = false;
                 previousGameTime = DateTime.Now.Ticks;
             }
-            if (battleState == BattleState.playerFaint && currentKeyboardState.IsKeyDown(Keys.E) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay && playerPokemonRect.Height <= 0)
+            if (battleState == BattleState.playerFaint && currentKeyboardState.IsKeyDown(Keys.E) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay && playerPokemonRect.Height <= 0 && !faintConfirmed)
+            {
+                faintConfirmed = true;
+                previousGameTime = DateTime.Now.Ticks;
+            }
+            if (battleState == BattleState.playerFaint && currentKeyboardState.IsKeyDown(Keys.E) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay && playerPokemonRect.Height <= 0 && faintConfirmed)
             {
                 //Trigger logic for selecting next pokemon here
 
@@ -721,6 +767,157 @@ namespace Phoenix
                 didLevelUp = false;
                 previousGameTime = DateTime.Now.Ticks;
             }
+            if (battleState == BattleState.learningMove) UpdateLearn();
+        }
+
+        //Function to update for learning moves
+        public void UpdateLearn()
+        {
+            //Update the keyboard
+            UpdateKeyboard();
+
+            if((learnMoveState == LearnMoveState.stage1) && (currentKeyboardState.IsKeyDown(Keys.A) || currentKeyboardState.IsKeyDown(Keys.Left)) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            {
+                if (selectedMove == "move2")
+                {
+                    menuSelectorMovesRect.X = 210;
+                    menuSelectorMovesRect.Y = 322;
+                    selectedMove = "move1";
+                }
+                if (selectedMove == "move4")
+                {
+                    menuSelectorMovesRect.X = 210;
+                    menuSelectorMovesRect.Y = 368;
+                    selectedMove = "move3";
+                }
+                previousGameTime = DateTime.Now.Ticks;
+            }
+            if ((learnMoveState == LearnMoveState.stage1) && (currentKeyboardState.IsKeyDown(Keys.S) || currentKeyboardState.IsKeyDown(Keys.Down)) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            {
+                if ( selectedMove == "move1")
+                {
+                    menuSelectorMovesRect.X = 210;
+                    menuSelectorMovesRect.Y = 368;
+                    selectedMove = "move3";
+                }
+                if (selectedMove == "move2")
+                {
+                    menuSelectorMovesRect.X = 400;
+                    menuSelectorMovesRect.Y = 368;
+                    selectedMove = "move4";
+                }
+                previousGameTime = DateTime.Now.Ticks;
+            }
+            if ((learnMoveState == LearnMoveState.stage1) && (currentKeyboardState.IsKeyDown(Keys.D) || currentKeyboardState.IsKeyDown(Keys.Right)) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            {
+                if (selectedMove == "move1")
+                {
+                    menuSelectorMovesRect.X = 400;
+                    menuSelectorMovesRect.Y = 322;
+                    selectedMove = "move2";
+                }
+                if (selectedMove == "move3")
+                {
+                    menuSelectorMovesRect.X = 400;
+                    menuSelectorMovesRect.Y = 368;
+                    selectedMove = "move4";
+                }
+                previousGameTime = DateTime.Now.Ticks;
+            }
+
+            if ((learnMoveState == LearnMoveState.stage1) && (currentKeyboardState.IsKeyDown(Keys.W) || currentKeyboardState.IsKeyDown(Keys.Up)) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            {
+                if (selectedMove == "move3")
+                {
+                    menuSelectorMovesRect.X = 210;
+                    menuSelectorMovesRect.Y = 322;
+                    selectedMove = "move1";
+                }
+                if (selectedMove == "move4")
+                {
+                    menuSelectorMovesRect.X = 400;
+                    menuSelectorMovesRect.Y = 322;
+                    selectedMove = "move2";
+                }
+                previousGameTime = DateTime.Now.Ticks;
+            }
+
+            if(learnMoveState == LearnMoveState.stage1 && currentKeyboardState.IsKeyDown(Keys.Escape) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            {
+                learnMoveState = LearnMoveState.stage0;
+                previousGameTime = DateTime.Now.Ticks;
+            }
+
+            if (learnMoveState == LearnMoveState.stage1 && currentKeyboardState.IsKeyDown(Keys.E) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            {
+                replaceMove(selectedMove);
+                learnMoveState = LearnMoveState.stage5;
+                previousGameTime = DateTime.Now.Ticks;
+
+            }
+
+            if(learnMoveState == LearnMoveState.stage5 && currentKeyboardState.IsKeyDown(Keys.E) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            {
+                savePokemon();
+                netAffinityGain = 0;
+                gameState = GameState.ready;
+                battleMenuDepth = BattleMenuDepth.initial;
+                battleState = BattleState.begin;
+                battleMenuSelection = "fight";
+                menuSelectorRect.X = 110;
+                menuSelectorRect.Y = 274;
+                enemyPokemonRect.Height = 192;
+                enemyPokemonRect.Y = 45;
+                didLevelUp = false;
+                previousGameTime = DateTime.Now.Ticks;
+            }
+
+
+            if ((learnMoveState == LearnMoveState.stage0 || learnMoveState == LearnMoveState.stage2) && currentKeyboardState.IsKeyDown(Keys.W) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            {
+                if (yesNoMenuSelectorRect.Y != 289) yesNoMenuSelectorRect.Y = 289;
+                Console.WriteLine("Up " + yesNoMenuSelectorRect.Y);
+                previousGameTime = DateTime.Now.Ticks;
+            }
+
+            if ((learnMoveState == LearnMoveState.stage0 || learnMoveState == LearnMoveState.stage2) && currentKeyboardState.IsKeyDown(Keys.S) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            {
+                if (yesNoMenuSelectorRect.Y != 326) yesNoMenuSelectorRect.Y = 326;
+                Console.WriteLine("Down " + yesNoMenuSelectorRect.Y);
+                previousGameTime = DateTime.Now.Ticks;
+            }
+            if((learnMoveState == LearnMoveState.stage0 || learnMoveState == LearnMoveState.stage2 || learnMoveState == LearnMoveState.stage6) && currentKeyboardState.IsKeyDown(Keys.E) && DateTime.Now.Ticks > previousGameTime + KeyboardDelay)
+            {
+                if(learnMoveState != LearnMoveState.stage2 && learnMoveState != LearnMoveState.stage6)
+                {
+                    if (yesNoMenuSelectorRect.Y == 326) learnMoveState = LearnMoveState.stage2;
+                    else learnMoveState = LearnMoveState.stage1; 
+                }
+                else if(learnMoveState != LearnMoveState.stage6)
+                {
+                    if (yesNoMenuSelectorRect.Y == 326) learnMoveState = LearnMoveState.stage0;
+                    else learnMoveState = LearnMoveState.stage6;   
+                }
+                else if(learnMoveState == LearnMoveState.stage6)
+                {
+                    //End the battle below
+                    savePokemon();
+                    netAffinityGain = 0;
+                    gameState = GameState.ready;
+                    battleMenuDepth = BattleMenuDepth.initial;
+                    battleState = BattleState.begin;
+                    battleMenuSelection = "fight";
+                    menuSelectorRect.X = 110;
+                    menuSelectorRect.Y = 274;
+                    enemyPokemonRect.Height = 192;
+                    enemyPokemonRect.Y = 45;
+                    didLevelUp = false;
+                    learnMoveState = LearnMoveState.stage0;
+                    previousGameTime = DateTime.Now.Ticks;
+                }
+                previousGameTime = DateTime.Now.Ticks;
+            }
+
         }
         //Function to update the splash screen
         public void UpdateSplash(GameTime gameTime)
@@ -974,6 +1171,7 @@ namespace Phoenix
                             femaleString = "";
                             playerFemaleString = "";
                             playerShinyString = "";
+                            faintConfirmed = false;
                             if (playerPokemonObject.isShiny) playerShinyString = "_shiny";
                             if (enemyPokemonObject.isShiny) shinyString = "_shiny";
                             if (playerPokemonObject.isFemale && playerPokemonObject.hasFemaleSprite) playerFemaleString = "_female";
@@ -1136,7 +1334,6 @@ namespace Phoenix
             }
 
         }
-
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -1176,7 +1373,9 @@ namespace Phoenix
             else if (invisibleCollisionMapData[y][x] != 0) return true;
             else return false;
         }
-
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         //Check if the tile the player is facing is a collidable NPC
         public int[] IsNPCCollide(int x, int y)
         {
@@ -2008,7 +2207,8 @@ namespace Phoenix
         //Check for learned moves
         public void doMoveCheck()
         {
-            Pokemon.moves moveToLearn = new Pokemon.moves();
+            Console.WriteLine("Check to learn new moves...");
+            moveToLearn = new Pokemon.moves();
             int sum = 0;
             foreach(int x in playerPokemonObject.attackAffinity)
             {
@@ -2019,7 +2219,7 @@ namespace Phoenix
                 sum += x;
             }
             moveToLearn = levelup.moveCheck(sum - playerPokemonObject.startAffinity, playerPokemonObject.pokedex, playerPokemonObject.currentMoveIndex);
-            
+
             if (moveToLearn.name != "blank" && playerPokemonObject.move3.name == "NONE")
             {
                 playerPokemonObject.move3 = moveToLearn;
@@ -2036,7 +2236,45 @@ namespace Phoenix
                 playerPokemonObject.currentMoveIndex++;
                 Console.WriteLine(playerPokemonObject.name + " learned " + moveToLearn.name);
             }
+            else if (moveToLearn.name != "blank")
+            {
+                battleState = BattleState.learningMove;
+                learnMoveState = LearnMoveState.stage0;
+            }
 
+        }
+
+        //Function to replace a pokemon move
+        public void replaceMove(string move)
+        {
+            switch (move)
+            {
+                case "move1":
+                    replacedMove = playerPokemonObject.move1.name;
+                    playerPokemonObject.move1 = moveToLearn;
+                    playerPokemonObject.PP_move1_current = playerPokemonObject.move1.PP;
+                    playerPokemonObject.PP_move1 = playerPokemonObject.move1.PP;
+                    break;
+                case "move2":
+                    replacedMove = playerPokemonObject.move2.name;
+                    playerPokemonObject.move2 = moveToLearn;
+                    playerPokemonObject.PP_move2_current = playerPokemonObject.move2.PP;
+                    playerPokemonObject.PP_move2 = playerPokemonObject.move2.PP;
+                    break;
+                case "move3":
+                    replacedMove = playerPokemonObject.move3.name;
+                    playerPokemonObject.move3 = moveToLearn;
+                    playerPokemonObject.PP_move3_current = playerPokemonObject.move3.PP;
+                    playerPokemonObject.PP_move3 = playerPokemonObject.move3.PP;
+                    break;
+                case "move4":
+                    replacedMove = playerPokemonObject.move4.name;
+                    playerPokemonObject.move4 = moveToLearn;
+                    playerPokemonObject.PP_move4_current = playerPokemonObject.move4.PP;
+                    playerPokemonObject.PP_move4 = playerPokemonObject.move4.PP;
+                    break;
+            }
+            playerPokemonObject.currentMoveIndex++;
         }
 
         //Level up a stat
@@ -2106,6 +2344,43 @@ namespace Phoenix
             if (battleState == BattleState.playerTurn && battleMenuDepth == BattleMenuDepth.fight) drawMoves();
             if (battleState == BattleState.enemyFaint) drawEnemyFaint();
             if (battleState == BattleState.playerFaint) drawPlayerFaint();
+            if (battleState == BattleState.learningMove) drawLearnMove();
+        }
+
+        //Draw move learning
+        public void drawLearnMove()
+        {
+            if (learnMoveState == LearnMoveState.stage0)
+            {
+                string genderString = "she";
+                if (!playerPokemonObject.isFemale) genderString = "he";
+                spriteBatch.DrawString(font, playerPokemonObject.name + " is trying to learn " + moveToLearn.name + " but " + genderString, line1, Color.Black);
+                spriteBatch.DrawString(font, "already knows four moves. Should a move be forgotten", line2, Color.Black);
+                spriteBatch.DrawString(font, "to make room for " + moveToLearn.name + "?", line3, Color.Black);
+                spriteBatch.Draw(yesNoMenu, yesNoMenuRect, Color.White);
+                spriteBatch.Draw(yesNoMenuSelector, yesNoMenuSelectorRect, Color.White);
+            }
+            if(learnMoveState == LearnMoveState.stage1)//Yes
+            {
+                spriteBatch.DrawString(font, "Which move should be forgotten?", line1, Color.Black);
+                drawMoves();
+
+            }
+            if(learnMoveState == LearnMoveState.stage2)//No
+            {
+                spriteBatch.DrawString(font, "Give up on learning " + moveToLearn.name + "?", line1, Color.Black);
+                spriteBatch.Draw(yesNoMenu, yesNoMenuRect, Color.White);
+                spriteBatch.Draw(yesNoMenuSelector, yesNoMenuSelectorRect, Color.White);
+            }
+            if(learnMoveState == LearnMoveState.stage5)
+            {
+                spriteBatch.DrawString(font, "Poof! " + playerPokemonObject.name + " has forgotten " + replacedMove + " and", line1, Color.Black);
+                spriteBatch.DrawString(font, "has learned " + moveToLearn.name + "!", line2, Color.Black);
+            }
+            if(learnMoveState == LearnMoveState.stage6)//No result
+            {
+                spriteBatch.DrawString(font, playerPokemonObject.name + " did not learn " + moveToLearn.name + ".", line1, Color.Black);
+            }
         }
 
         //Draw Gender
@@ -2125,13 +2400,16 @@ namespace Phoenix
             spriteBatch.DrawString(font, "Enemy " + enemyPokemonObject.name + " has fainted!", new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
             spriteBatch.DrawString(font, playerPokemonObject.name + " has gained " + netAffinityGain + " affinity points!", new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
             if(didLevelUp) spriteBatch.DrawString(font, playerPokemonObject.name + " has gained 1 point of " + leveledStat + "!", new Vector2(dialogueX + 15, dialogueY + 41), Color.Black);
-            if (playerPokemonObject.totalAffinity >= 20)
+            if (playerPokemonObject.totalAffinity >= 20 || faintConfirmed)
             {
-                leveledStat = levelup.levelUp();
-                didLevelUp = true;
-                playerPokemonObject.totalAffinity -= 20;
-                doLevelStat(leveledStat);
-                doMoveCheck();
+                if (!didLevelUp && playerPokemonObject.totalAffinity >= 20)
+                {
+                    leveledStat = levelup.levelUp();
+                    didLevelUp = true;
+                    playerPokemonObject.totalAffinity -= 20;
+                    doLevelStat(leveledStat);
+                }
+                if(faintConfirmed)doMoveCheck();
             }
             if (DateTime.Now.Ticks >= previousGameTime + KeyboardDelay && enemyPokemonRect.Height > 0)
             {
@@ -2146,13 +2424,16 @@ namespace Phoenix
             spriteBatch.DrawString(font, playerPokemonObject.name + " has fainted!", new Vector2(dialogueX + 15, dialogueY + 9), Color.Black);
             spriteBatch.DrawString(font, playerPokemonObject.name + " has gained " + netAffinityGain + " affinity points!", new Vector2(dialogueX + 15, dialogueY + 25), Color.Black);
             if(didLevelUp) spriteBatch.DrawString(font, playerPokemonObject.name + " has gained 1 point of " + leveledStat + "!", new Vector2(dialogueX + 15, dialogueY + 41), Color.Black);
-            if (playerPokemonObject.totalAffinity >= 20)
+            if (playerPokemonObject.totalAffinity >= 20 || faintConfirmed)
             {
-                leveledStat = levelup.levelUp();
-                didLevelUp = true;
-                playerPokemonObject.totalAffinity -= 20;
-                doLevelStat(leveledStat);
-                doMoveCheck();
+                if (!didLevelUp && playerPokemonObject.totalAffinity >= 20)
+                {
+                    leveledStat = levelup.levelUp();
+                    didLevelUp = true;
+                    playerPokemonObject.totalAffinity -= 20;
+                    doLevelStat(leveledStat);
+                }
+                if (faintConfirmed) doMoveCheck();
             }
             if (DateTime.Now.Ticks >= previousGameTime + KeyboardDelay && playerPokemonRect.Height > 0)
             {

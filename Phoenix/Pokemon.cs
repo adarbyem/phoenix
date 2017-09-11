@@ -341,7 +341,7 @@ namespace Phoenix
                     newPokemon.setAttrib(50, 50, 50, 50, 50, 50, "normal", "fire", "blank");
                     break;
                 case "7":
-                    newPokemon.setStats("Squritle", 10, tackle, tailWhip, NONE, NONE, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP, isFemale, false);
+                    newPokemon.setStats("Squirtle", 10, tackle, tailWhip, poisonPowder, stunPowder, isShiny, int.Parse(id), "", tackle.PP, tailWhip.PP, NONE.PP, NONE.PP, isFemale, false);
                     newPokemon.setAttrib(50, 50, 50, 50, 50, 50, "normal", "water", "blank");
                     break;
                 case "16":
